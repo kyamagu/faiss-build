@@ -1,0 +1,48 @@
+name: Build
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  release:
+    types: [published]
+
+jobs:
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            arch: x86_64
+            opt_level: avx512
+          - os: ubuntu-24.04-arm
+            arch: aarch64
+            opt_level: sve
+          - os: macos-13
+            arch: x86_64
+            opt_level: avx2
+          - os: macos-14
+            arch: arm64
+            opt_level: generic
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v3.1.4
+        env:
+          CIBW_ARCHS: ${{ matrix.arch }}
+          CIBW_ENVIRONMENT_LINUX: >
+            FAISS_OPT_LEVEL=${{ matrix.opt_level }}
+            FAISS_ENABLE_GPU=OFF
+          CIBW_ENVIRONMENT_MACOS: >
+            FAISS_OPT_LEVEL=${{ matrix.opt_level }}
+            MACOSX_DEPLOYMENT_TARGET=${{ matrix.os == 'macos-13' && '13.0' || '14.0'}}
+            OpenMP_ROOT=${{ matrix.os == 'macos-13' && '/usr/local/opt/libomp' || '/opt/homebrew/opt/libomp'}}
+          CIBW_BEFORE_ALL: bash scripts/before_${{ runner.os }}.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheel-${{ matrix.os }}-${{ matrix.arch }}
+          path: ./dist/*.whl
