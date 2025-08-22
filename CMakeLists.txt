@@ -6,9 +6,18 @@ set(PYTHON_PACKAGE_NAME "faiss")
 # Build-time options.
 option(FAISS_OPT_LEVEL "Optimization level, one of <generic|avx2|avx512|avx512_spr|sve>" "generic")
 option(FAISS_ENABLE_GPU "Enable support for GPU indexes." OFF)
+option(FAISS_USE_LTO "Enable Link Time Optimization (LTO)." ON)
+set(BUILD_TESTING OFF)
+
+# Set up platform-specific flags.
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    add_compile_options(-fdata-sections -ffunction-sections)
+    add_link_options(-Wl,--gc-sections)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    add_link_options(-dead_strip)
+endif()
 
 # Import symbols from the third-party/faiss directory.
-set(BUILD_TESTING OFF)
 add_subdirectory(third-party/faiss EXCLUDE_FROM_ALL)
 
 # Set and install the targets based on the optimization level.
