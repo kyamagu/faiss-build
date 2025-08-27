@@ -34,10 +34,6 @@ build-backend = "scikit_build_core.build"
 minversion = "6.0"
 testpaths = ["third-party/faiss/tests"]
 python_files = "test_*.py"  # torch_test_*.py will break the other tests
-
-[tool.cibuildwheel]
-test-requires = ["pytest", "scipy"]
-test-command = "pytest {project}/third-party/faiss/tests"
 addopts = [
     # Failing tests for numerical issues.
     "--deselect=third-party/faiss/tests/test_local_search_quantizer.py::TestProductLocalSearchQuantizer::test_lut",
@@ -45,6 +41,10 @@ addopts = [
     "--deselect=third-party/faiss/tests/test_contrib.py::TestPreassigned::test_float",
     "--deselect=third-party/faiss/tests/test_contrib.py::TestClustering::test_ivf_train_2level",
 ]
+
+[tool.cibuildwheel]
+test-requires = ["pytest", "scipy"]
+test-command = "pytest {project}/third-party/faiss/tests"
 
 [tool.cibuildwheel.windows]
 before-build = "pip install delvewheel"
