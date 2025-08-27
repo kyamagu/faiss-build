@@ -37,7 +37,7 @@ jobs:
         env:
           CIBW_ARCHS: ${{ matrix.arch }}
           CIBW_ENVIRONMENT_LINUX: >
-            SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
+            SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }};BLA_STATIC=ON"
           CIBW_ENVIRONMENT_MACOS: >
             SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.os == 'macos-13' && '13.0' || '14.0' }}
