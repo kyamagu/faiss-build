@@ -29,3 +29,16 @@ dependencies = ["numpy>=1.25.0,<3.0", "packaging"]
 [build-system]
 requires = ["scikit-build-core>=0.10", "swig", "numpy>=2.0,<3.0"]
 build-backend = "scikit_build_core.build"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["third-party/faiss/tests"]
+python_files = "test_*.py"  # torch_test_*.py will break the other tests
+
+[tool.cibuildwheel]
+test-requires = ["pytest", "scipy"]
+test-command = "pytest {project}/third-party/faiss/tests"
+
+[tool.cibuildwheel.windows]
+before-build = "pip install delvewheel"
+repair-wheel-command = "delvewheel repair -v -w {dest_dir} {wheel}"
