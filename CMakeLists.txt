@@ -7,14 +7,21 @@ set(PYTHON_PACKAGE_NAME "faiss")
 option(FAISS_OPT_LEVEL "Optimization level, one of <generic|avx2|avx512|avx512_spr|sve>" "generic")
 option(FAISS_ENABLE_GPU "Enable support for GPU indexes." OFF)
 option(FAISS_USE_LTO "Enable Link Time Optimization (LTO)." ON)
+set(FAISS_ENABLE_EXTRAS OFF)
 set(BUILD_TESTING OFF)
 
 # Set up platform-specific flags.
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+if(APPLE)
+    add_link_options(-dead_strip)
+elseif(UNIX)
     add_compile_options(-fdata-sections -ffunction-sections)
     add_link_options(-Wl,--gc-sections)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    add_link_options(-dead_strip)
+endif()
+
+# Use ccache if available.
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
 endif()
 
 # Import symbols from the third-party/faiss directory.
