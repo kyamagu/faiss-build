@@ -14,17 +14,17 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-24.04
-            arch: x86_64
-            opt_level: avx512
-          - os: ubuntu-24.04-arm
-            arch: aarch64
-            opt_level: sve
-          - os: macos-13
-            arch: x86_64
+          # - os: ubuntu-24.04
+          #   opt_level: avx512
+          # - os: ubuntu-24.04-arm
+          #   opt_level: sve
+          # - os: macos-13
+          #   opt_level: avx2
+          # - os: macos-14
+          #   opt_level: generic
+          - os: windows-2022
             opt_level: avx2
-          - os: macos-14
-            arch: arm64
+          - os: windows-11-arm
             opt_level: generic
     steps:
       - uses: actions/checkout@v5
@@ -35,9 +35,13 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.1.4
         env:
-          CIBW_ARCHS: ${{ matrix.arch }}
           CIBW_ENVIRONMENT_LINUX: >
             SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
+          CIBW_ENVIRONMENT_WINDOWS: >
+            SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
+            PATH="${PATH};${ProgramFiles}\\OpenBLAS\\bin"
+            CMAKE_INCLUDE_PATH="${ProgramFiles}\\OpenBLAS\\include"
+            CMAKE_LIBRARY_PATH="${ProgramFiles}\\OpenBLAS\\lib"
           CIBW_ENVIRONMENT_MACOS: >
             SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.os == 'macos-13' && '13.0' || '14.0' }}
@@ -45,5 +49,5 @@ jobs:
           CIBW_BEFORE_ALL: bash scripts/before_${{ runner.os }}.sh
       - uses: actions/upload-artifact@v4
         with:
-          name: wheel-${{ matrix.os }}-${{ matrix.arch }}
+          name: wheel-${{ matrix.os }}
           path: ./wheelhouse/*.whl
