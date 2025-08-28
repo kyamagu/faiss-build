@@ -20,7 +20,7 @@ function install_openblas() {
     powershell.exe -Command "Remove-Item '$INSTALL_DIR/OpenBLAS*' -Recurse"
 
     # Fix x64 OpenBLAS package content.
-    if [ $1 -eq "x64" ]; then
+    if [ "$1" == "x64" ]; then
         for file in "${INSTALL_DIR}/lib/libopenblas"*; do
             base=$(basename "$file")
             newname="${base/lib/}"
