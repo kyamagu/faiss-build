@@ -14,14 +14,14 @@ jobs:
     strategy:
       matrix:
         include:
-          # - os: ubuntu-24.04
-          #   opt_level: avx512
-          # - os: ubuntu-24.04-arm
-          #   opt_level: sve
-          # - os: macos-13
-          #   opt_level: avx2
-          # - os: macos-14
-          #   opt_level: generic
+          - os: ubuntu-24.04
+            opt_level: avx512
+          - os: ubuntu-24.04-arm
+            opt_level: sve
+          - os: macos-13
+            opt_level: avx2
+          - os: macos-14
+            opt_level: generic
           - os: windows-2022
             opt_level: avx2
           - os: windows-11-arm
