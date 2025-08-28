@@ -33,7 +33,7 @@ build-backend = "scikit_build_core.build"
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = ["third-party/faiss/tests"]
-python_files = "test_*.py"  # torch_test_*.py will break the other tests
+python_files = "test_*.py"  # torch_test_*.py will break the other tests.
 addopts = [
     # Failing tests for numerical issues.
     "--deselect=third-party/faiss/tests/test_local_search_quantizer.py::TestProductLocalSearchQuantizer::test_lut",
@@ -51,3 +51,11 @@ test-command = "pytest {project}/third-party/faiss/tests"
 [tool.cibuildwheel.windows]
 before-build = "pip install delvewheel"
 repair-wheel-command = "delvewheel repair -v -w {dest_dir} {wheel}"
+test-requires = ["pytest"]
+# Disable scipy tests on Windows.
+test-command = """
+pytest {project}/third-party/faiss/tests/ \
+    --deselect={project}/third-party/faiss/tests/test_contrib_with_scipy.py \
+    --deselect={project}/third-party/faiss/tests/test_extra_distances.py \
+    --deselect={project}/third-party/faiss/tests/test_residual_quantizer.py
+"""

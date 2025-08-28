@@ -2,15 +2,13 @@
 
 set -eux
 
-CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH:-"c:\\opt"}
-
 # Function to install OpenBLAS for Windows from https://github.com/OpenMathLib/OpenBLAS/releases
 function install_openblas() {
     echo "Installing OpenBLAS for Windows..."
     local OPENBLAS_VERSION="0.3.30"
     local OPENBLAS_URL="https://github.com/OpenMathLib/OpenBLAS/releases/download/v${OPENBLAS_VERSION}/OpenBLAS-${OPENBLAS_VERSION}-$1.zip"
     local ZIP_PATH="$RUNNER_TEMP/OpenBLAS.zip"
-    local INSTALL_DIR="${CMAKE_PREFIX_PATH}"
+    local INSTALL_DIR="${INSTALL_DIR:-c:/Program\ Files/OpenBLAS}"
     curl -sL "$OPENBLAS_URL" -o "$ZIP_PATH"
     mkdir -p "$INSTALL_DIR"
 

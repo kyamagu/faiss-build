@@ -20,7 +20,7 @@ elseif(UNIX)
 elseif(WIN32)
     # /wd4101 unreferenced local variable
     # /MD Bugfix: https://bugs.python.org/issue38597
-    add_compile_options(/Zc:inline /wd4101 /MD)
+    add_compile_options(/Zc:inline /wd4101 /wd4267 /MD)
     add_link_options(/OPT:ICF /OPT:REF)
 endif()
 
