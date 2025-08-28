@@ -28,7 +28,7 @@ function install_openblas() {
         fi
     done
     if [ ! -e "${INSTALL_DIR}/bin/openblas.dll" ]; then
-        ln -s "${INSTALL_DIR}/lib/libopenblas.dll" "${INSTALL_DIR}/bin/openblas.dll"
+        ln -s "${INSTALL_DIR}/bin/libopenblas.dll" "${INSTALL_DIR}/bin/openblas.dll"
     fi
 }
 
