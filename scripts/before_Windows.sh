@@ -19,16 +19,14 @@ function install_openblas() {
     powershell.exe -Command "Move-Item '$INSTALL_DIR/OpenBLAS*/*' '$INSTALL_DIR/' -Force"
     powershell.exe -Command "Remove-Item '$INSTALL_DIR/OpenBLAS*' -Recurse"
 
-    # Add symlink if the name is different
-    for file in "${INSTALL_DIR}/lib/libopenblas"*; do
-        base=$(basename "$file")
-        newname="${base/lib/}"
-        if [ ! -e "${INSTALL_DIR}/lib/${newname}" ]; then
-            ln -s "$file" "${INSTALL_DIR}/lib/${newname}"
-        fi
-    done
-    if [ ! -e "${INSTALL_DIR}/bin/openblas.dll" ]; then
-        ln -s "${INSTALL_DIR}/bin/libopenblas.dll" "${INSTALL_DIR}/bin/openblas.dll"
+    # Fix x64 OpenBLAS package content.
+    if [ $1 -eq "x64" ]; then
+        for file in "${INSTALL_DIR}/lib/libopenblas"*; do
+            base=$(basename "$file")
+            newname="${base/lib/}"
+            mv "$file" "${INSTALL_DIR}/lib/${newname}"
+        done
+        mv "${INSTALL_DIR}/bin/libopenblas.dll" "${INSTALL_DIR}/bin/openblas.dll"
     fi
 }
 
