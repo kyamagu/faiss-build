@@ -39,9 +39,10 @@ jobs:
             SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
           CIBW_ENVIRONMENT_WINDOWS: >
             SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
-            PATH="${PATH};c:\\Program\ Files\\OpenBLAS\\bin"
-            CPATH="${CPATH};c:\\Program\ Files\\OpenBLAS\\include"
-            LIB="${LIB};c:\\Program\ Files\\OpenBLAS\\lib"
+            CMAKE_PREFIX_PATH="c:\\opt"
+            PATH="${PATH};c:\\opt\\bin"
+            CPATH="${CPATH};c:\\opt\\include"
+            LIB="${LIB};c:\\opt\\lib"
           CIBW_ENVIRONMENT_MACOS: >
             SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.os == 'macos-13' && '13.0' || '14.0' }}
