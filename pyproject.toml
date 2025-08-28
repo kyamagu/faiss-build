@@ -32,6 +32,7 @@ build-backend = "scikit_build_core.build"
 
 [tool.scikit-build]
 wheel.py-api = "cp38"  # Stable ABI.
+build.verbose = true
 
 [tool.pytest.ini_options]
 minversion = "6.0"
