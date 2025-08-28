@@ -30,6 +30,9 @@ dependencies = ["numpy>=1.25.0,<3.0", "packaging"]
 requires = ["scikit-build-core>=0.10", "swig>=3.0.12", "numpy>=2.0,<3.0"]
 build-backend = "scikit_build_core.build"
 
+[tool.scikit-build]
+wheel.py-api = "cp39"  # Stable ABI.
+
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = ["third-party/faiss/tests"]
@@ -47,12 +50,14 @@ archs = "native"
 # cp39 and cp310 aren't supported on Windows ARM64
 # cp314t-win issue: https://gitlab.kitware.com/cmake/cmake/-/issues/26926
 skip = "cp39-win_arm64 cp310-win_arm64 cp314t-win*"
+repair-wheel-command = [
+    "pipx run repairwheel -o {dest_dir} {wheel}",
+    "pipx run abi3audit --strict --report {wheel}"
+]
 test-requires = ["pytest", "scipy"]
 test-command = "pytest {project}/third-party/faiss/tests"
 
 [tool.cibuildwheel.windows]
-before-build = "pip install delvewheel"
-repair-wheel-command = "delvewheel repair -v -w {dest_dir} {wheel}"
 test-requires = ["pytest"]
 # Disable scipy tests on Windows.
 test-command = """

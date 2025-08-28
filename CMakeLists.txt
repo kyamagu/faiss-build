@@ -35,14 +35,34 @@ endif()
 # Import symbols from the third-party/faiss directory.
 add_subdirectory(third-party/faiss EXCLUDE_FROM_ALL)
 
-# Set and install the targets based on the optimization level.
-function(install_swig_target target)
-    set_target_properties(${target} PROPERTIES EXCLUDE_FROM_ALL FALSE)
-    install(TARGETS ${target} DESTINATION ${PYTHON_PACKAGE_NAME})
-    get_property(support_files TARGET ${target} PROPERTY SWIG_SUPPORT_FILES)
+# Stable ABI configuration.
+if(NOT "${SKBUILD_SABI_VERSION}" STREQUAL "")
+    find_package(Python REQUIRED COMPONENTS ${SKBUILD_SABI_COMPONENT})
+endif()
+
+# Helper to install SWIG targets.
+function(install_swig_target name)
+    # Enable the target.
+    set_target_properties(${name} PROPERTIES EXCLUDE_FROM_ALL FALSE)
+
+    # Stable ABI configuration.
+    if(NOT "${SKBUILD_SABI_VERSION}" STREQUAL "")
+        set_target_properties(${name} PROPERTIES WITH_SOABI TRUE)
+        set_target_properties(${name} PROPERTIES USE_SABI ${SKBUILD_SABI_VERSION})
+        if(WIN32)
+            set_target_properties(${name} PROPERTIES SUFFIX ".${SKBUILD_SOABI}.pyd")
+        else()
+            set_target_properties(${name} PROPERTIES SUFFIX ".${SKBUILD_SOABI}${CMAKE_SHARED_MODULE_SUFFIX}")
+        endif()
+    endif()
+
+    # Install the SWIG-generated files and the built shared library.
+    get_property(support_files TARGET ${name} PROPERTY SWIG_SUPPORT_FILES)
+    install(TARGETS ${name} DESTINATION ${PYTHON_PACKAGE_NAME})
     install(FILES ${support_files} DESTINATION ${PYTHON_PACKAGE_NAME})
 endfunction()
 
+# Install the targets based on the optimization level.
 install_swig_target(swigfaiss)
 if(FAISS_OPT_LEVEL MATCHES "^(avx2|avx512|avx512_spr)$")
     install_swig_target(swigfaiss_avx2)
