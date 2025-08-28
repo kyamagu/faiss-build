@@ -21,12 +21,7 @@ function install_openblas() {
 
     # Fix x64 OpenBLAS package content.
     if [ "$1" == "x64" ]; then
-        for file in "${INSTALL_DIR}/lib/libopenblas"*; do
-            base=$(basename "$file")
-            newname="${base/lib/}"
-            mv "$file" "${INSTALL_DIR}/lib/${newname}"
-        done
-        mv "${INSTALL_DIR}/bin/libopenblas.dll" "${INSTALL_DIR}/bin/openblas.dll"
+        powershell.exe -Command "New-Item -Path '$INSTALL_DIR/lib/openblas.lib' -ItemType SymbolicLink -Target '$INSTALL_DIR/lib/libopenblas.lib'"
     fi
 }
 
