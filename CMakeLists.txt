@@ -19,9 +19,11 @@ elseif(UNIX)
     add_link_options(-Wl,--gc-sections)
 elseif(WIN32)
     # /wd4101 unreferenced local variable
+    # /wd4267 conversion from 'size_t' to 'type', possible loss of data
+    # /wd4477 printf formatting
     # /MD Bugfix: https://bugs.python.org/issue38597
-    add_compile_options(/Zc:inline /wd4101 /wd4267 /MD)
-    add_link_options(/OPT:ICF /OPT:REF)
+    add_compile_options(/Zc:inline /wd4101 /wd4267 /wd4477 /MD)
+    add_link_options(/OPT:ICF /OPT:REF /ignore:4286)
 endif()
 
 # Use ccache if available.
