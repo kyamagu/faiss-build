@@ -55,7 +55,7 @@ test-requires = ["pytest"]
 # Disable scipy tests on Windows.
 test-command = """
 pytest {project}/third-party/faiss/tests/ \
-    --deselect={project}/third-party/faiss/tests/test_contrib_with_scipy.py \
-    --deselect={project}/third-party/faiss/tests/test_extra_distances.py \
-    --deselect={project}/third-party/faiss/tests/test_residual_quantizer.py
+    --ignore={project}/third-party/faiss/tests/test_contrib_with_scipy.py \
+    --ignore={project}/third-party/faiss/tests/test_extra_distances.py \
+    --ignore={project}/third-party/faiss/tests/test_residual_quantizer.py
 """
