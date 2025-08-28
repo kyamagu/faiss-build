@@ -47,8 +47,7 @@ function(install_swig_target name)
 
     # Stable ABI configuration.
     if(NOT "${SKBUILD_SABI_VERSION}" STREQUAL "")
-        set_target_properties(${name} PROPERTIES WITH_SOABI TRUE)
-        set_target_properties(${name} PROPERTIES USE_SABI ${SKBUILD_SABI_VERSION})
+        target_compile_definitions(${name} PRIVATE Py_LIMITED_API=0x03080000)
         if(WIN32)
             set_target_properties(${name} PROPERTIES SUFFIX ".${SKBUILD_SOABI}.pyd")
         else()
