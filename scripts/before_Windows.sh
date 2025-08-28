@@ -8,7 +8,7 @@ function install_openblas() {
     local OPENBLAS_VERSION="0.3.30"
     local OPENBLAS_URL="https://github.com/OpenMathLib/OpenBLAS/releases/download/v${OPENBLAS_VERSION}/OpenBLAS-${OPENBLAS_VERSION}-$1.zip"
     local ZIP_PATH="$RUNNER_TEMP/OpenBLAS.zip"
-    local DEST_PATH="${ProgramFiles:-'c:/Program Files'}/OpenBLAS"
+    local DEST_PATH="${ProgramFiles:-c:/Program Files}/OpenBLAS"
     curl -sL "$OPENBLAS_URL" -o "$ZIP_PATH"
     mkdir -p "$DEST_PATH"
 
