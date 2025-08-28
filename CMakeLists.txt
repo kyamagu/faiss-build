@@ -51,7 +51,7 @@ function(install_swig_target name)
         string(REPLACE "swig" "" libname ${name})
         set_property(
             TARGET ${name} PROPERTY
-            LINK_LIBRARY_OVERRIDE Python::NumPy;Python::SABIModule,OpenMP::OpenMP_CXX,${libname},faiss_python_callbacks
+            LINK_LIBRARY_OVERRIDE Python::NumPy;Python::SABIModule;OpenMP::OpenMP_CXX;${libname};faiss_python_callbacks
         )
         if(WIN32)
             set_target_properties(${name} PROPERTIES SUFFIX ".${SKBUILD_SOABI}.pyd")
