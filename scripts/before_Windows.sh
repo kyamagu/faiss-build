@@ -27,8 +27,9 @@ function install_openblas() {
             ln -s "$file" "${INSTALL_DIR}/lib/${newname}"
         fi
     done
-
-    ls ${INSTALL_DIR}/*
+    if [ ! -e "${INSTALL_DIR}/bin/openblas.dll" ]; then
+        ln -s "${INSTALL_DIR}/lib/libopenblas.dll" "${INSTALL_DIR}/bin/openblas.dll"
+    fi
 }
 
 # Install system dependencies
