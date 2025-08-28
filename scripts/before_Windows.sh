@@ -16,11 +16,6 @@ function install_openblas() {
     powershell.exe -Command "Expand-Archive -Path '$ZIP_PATH' -DestinationPath '$INSTALL_DIR' -Force"
     powershell.exe -Command "Move-Item '$INSTALL_DIR/OpenBLAS*/*' '$INSTALL_DIR/' -Force"
     powershell.exe -Command "Remove-Item '$INSTALL_DIR/OpenBLAS*' -Recurse"
-
-    # # Fix x64 OpenBLAS package content.
-    # if [ "$1" == "x64" ]; then
-    #     powershell.exe -Command "New-Item -Path '$INSTALL_DIR/lib/openblas.lib' -ItemType SymbolicLink -Target '$INSTALL_DIR/lib/libopenblas.lib'"
-    # fi
 }
 
 # Install system dependencies
