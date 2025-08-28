@@ -43,6 +43,7 @@ addopts = [
 ]
 
 [tool.cibuildwheel]
+skip = "cp39-win_arm64 cp310-win_arm64"
 test-requires = ["pytest", "scipy"]
 test-command = "pytest {project}/third-party/faiss/tests"
 

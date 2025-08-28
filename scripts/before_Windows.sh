@@ -16,6 +16,11 @@ function install_openblas() {
     powershell.exe -Command "Expand-Archive -Path '$ZIP_PATH' -DestinationPath '$DEST_PATH' -Force"
     powershell.exe -Command "Move-Item '$DEST_PATH/OpenBLAS*/*' '$DEST_PATH/' -Force"
     powershell.exe -Command "Remove-Item '$DEST_PATH/OpenBLAS*' -Recurse"
+
+    # Add symlink if the name is different
+    if [ ! -f "${DEST_PATH}/lib/openblas.lib" ]; then
+        powershell.exe -Command "New-Item -Path '${DEST_PATH}/lib/openblas.lib' -ItemType SymbolicLink -Target '${DEST_PATH}/lib/libopenblas.lib'"
+    fi
 }
 
 # Install system dependencies
@@ -23,5 +28,5 @@ if [[ "$PROCESSOR_IDENTIFIER" == ARM* ]]; then
     # NOTE: PROCESSOR_ARCHITECTURE is incorrectly set to "AMD64" on emulated ARM64 Windows runners.
     install_openblas woa64-dll
 else
-    vcpkg install openblas:x64-windows
+    install_openblas x64
 fi
