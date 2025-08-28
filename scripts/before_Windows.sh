@@ -16,8 +16,8 @@ function install_openblas() {
 
     # Extract to destination
     powershell.exe -Command "Expand-Archive -Path '$ZIP_PATH' -DestinationPath '$INSTALL_DIR' -Force"
-    mv $INSTALL_DIR/OpenBLAS*/* $INSTALL_DIR/
-    rm -rf $INSTALL_DIR/OpenBLAS*
+    powershell.exe -Command "Move-Item $DEST_PATH/OpenBLAS*/* $DEST_PATH/ -Force; Remove-Item $DEST_PATH/OpenBLAS* -Recurse"
+    ls ${INSTALL_DIR}
 
     # Add symlink if the name is different
     if [ ! -f "${INSTALL_DIR}/lib/openblas.lib" ]; then
