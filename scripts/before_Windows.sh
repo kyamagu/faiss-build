@@ -18,12 +18,17 @@ function install_openblas() {
     powershell.exe -Command "Expand-Archive -Path '$ZIP_PATH' -DestinationPath '$INSTALL_DIR' -Force"
     powershell.exe -Command "Move-Item '$INSTALL_DIR/OpenBLAS*/*' '$INSTALL_DIR/' -Force"
     powershell.exe -Command "Remove-Item '$INSTALL_DIR/OpenBLAS*' -Recurse"
-    ls ${INSTALL_DIR}
 
     # Add symlink if the name is different
-    if [ ! -f "${INSTALL_DIR}/lib/openblas.lib" ]; then
-        ln -s ${INSTALL_DIR}/lib/libopenblas.lib ${INSTALL_DIR}/lib/openblas.lib
-    fi
+    for file in "${INSTALL_DIR}/lib/libopenblas"*; do
+        base=$(basename "$file")
+        newname="${base/lib/}"
+        if [ ! -e "${INSTALL_DIR}/lib/${newname}" ]; then
+            ln -s "$file" "${INSTALL_DIR}/lib/${newname}"
+        fi
+    done
+
+    ls ${INSTALL_DIR}/*
 }
 
 # Install system dependencies

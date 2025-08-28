@@ -38,7 +38,7 @@ jobs:
           CIBW_ENVIRONMENT_LINUX: >
             SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
           CIBW_ENVIRONMENT_WINDOWS: >
-            SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
+            SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }};BLA_STATIC=ON"
             CMAKE_PREFIX_PATH="c:\\opt"
             PATH="${PATH};c:\\opt\\bin"
             CPATH="${CPATH};c:\\opt\\include"
