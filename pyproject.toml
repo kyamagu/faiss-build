@@ -27,13 +27,13 @@ classifiers = [
 dependencies = ["numpy>=1.25.0,<3.0", "packaging"]
 
 [build-system]
-requires = ["scikit-build-core>=0.10", "swig", "numpy>=2.0,<3.0"]
+requires = ["scikit-build-core>=0.10", "swig>=3.0.12", "numpy>=2.0,<3.0"]
 build-backend = "scikit_build_core.build"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = ["third-party/faiss/tests"]
-python_files = "test_*.py"  # torch_test_*.py will break the other tests
+python_files = "test_*.py"  # torch_test_*.py will break the other tests.
 addopts = [
     # Failing tests for numerical issues.
     "--deselect=third-party/faiss/tests/test_local_search_quantizer.py::TestProductLocalSearchQuantizer::test_lut",
@@ -43,9 +43,21 @@ addopts = [
 ]
 
 [tool.cibuildwheel]
+archs = "native"
+# cp39 and cp310 aren't supported on Windows ARM64
+# cp314t-win issue: https://gitlab.kitware.com/cmake/cmake/-/issues/26926
+skip = "cp39-win_arm64 cp310-win_arm64 cp314t-win*"
 test-requires = ["pytest", "scipy"]
 test-command = "pytest {project}/third-party/faiss/tests"
 
 [tool.cibuildwheel.windows]
 before-build = "pip install delvewheel"
 repair-wheel-command = "delvewheel repair -v -w {dest_dir} {wheel}"
+test-requires = ["pytest"]
+# Disable scipy tests on Windows.
+test-command = """
+pytest {project}/third-party/faiss/tests/ \
+    --ignore={project}/third-party/faiss/tests/test_contrib_with_scipy.py \
+    --ignore={project}/third-party/faiss/tests/test_extra_distances.py \
+    --ignore={project}/third-party/faiss/tests/test_residual_quantizer.py
+"""
