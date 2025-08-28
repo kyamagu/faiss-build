@@ -35,11 +35,6 @@ endif()
 # Import symbols from the third-party/faiss directory.
 add_subdirectory(third-party/faiss EXCLUDE_FROM_ALL)
 
-# Stable ABI configuration.
-if(NOT "${SKBUILD_SABI_VERSION}" STREQUAL "")
-    find_package(Python REQUIRED COMPONENTS ${SKBUILD_SABI_COMPONENT})
-endif()
-
 # Helper to install SWIG targets.
 function(install_swig_target name)
     # Enable the target.
@@ -48,11 +43,6 @@ function(install_swig_target name)
     # Stable ABI configuration.
     if(NOT "${SKBUILD_SABI_VERSION}" STREQUAL "")
         target_compile_definitions(${name} PRIVATE Py_LIMITED_API=0x03080000)
-        string(REPLACE "swig" "" libname ${name})
-        set_property(
-            TARGET ${name} PROPERTY
-            LINK_LIBRARY_OVERRIDE Python::NumPy;Python::SABIModule;OpenMP::OpenMP_CXX;${libname};faiss_python_callbacks
-        )
         if(WIN32)
             set_target_properties(${name} PROPERTIES SUFFIX ".${SKBUILD_SOABI}.pyd")
         else()
