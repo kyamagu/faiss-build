@@ -45,13 +45,14 @@ function(configure_extension suffix)
     ${swig_source_file}
     PROPERTIES CPLUSPLUS ON
                USE_TARGET_INCLUDE_DIRECTORIES TRUE
-               COMPILE_DEFINITIONS "$<$<BOOL:${FAISS_ENABLE_GPU}>:GPU_WRAPPER>"
+               COMPILE_DEFINITIONS "$<$<BOOL:${WIN32}>:/bigobj>"
+               "$<$<BOOL:${WIN32}>:SWIGWIN>"
+               "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:SWIGWORDSIZE64>"
+               "$<$<BOOL:${FAISS_ENABLE_GPU}>:GPU_WRAPPER>"
                "$<$<BOOL:${FAISS_ENABLE_ROCM}>:FAISS_ENABLE_ROCM>"
                "$<$<BOOL:${FAISS_ENABLE_CUVS}>:FAISS_ENABLE_CUVS>"
-               COMPILE_OPTIONS "-doxygen"
-               "$<$<BOOL:${WIN32}>:/bigobj>" "$<$<BOOL:${WIN32}>:-DSWIGWIN>"
-               "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:-DSWIGWORDSIZE64>"
-               DEPENDS
+               COMPILE_OPTIONS
+               "-doxygen" DEPENDS
                "${FAISS_HEADERS}"
                "$<$<BOOL:${FAISS_ENABLE_GPU}>:${FAISS_GPU_HEADERS}>"
                SWIG_MODULE_NAME ${target})
