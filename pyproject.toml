@@ -30,6 +30,9 @@ dependencies = ["numpy>=1.25.0,<3.0", "packaging"]
 requires = ["scikit-build-core>=0.10", "swig>=3.0.12", "numpy>=2.0,<3.0"]
 build-backend = "scikit_build_core.build"
 
+[dependency-groups]
+dev = ["pytest>=8.4.1", "scipy>=1.13.1"]
+
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = ["third-party/faiss/tests"]
@@ -70,19 +73,9 @@ repair-wheel-command = [
 ]
 # Disable scipy tests on Windows.
 test-requires = ["pytest"]
-test-command = [
-    "python -m sysconfig",
-    "python -c \"import faiss\""
-]
-# test-command = """
-# pytest {project}/third-party/faiss/tests/ \
-#     --ignore={project}/third-party/faiss/tests/test_contrib_with_scipy.py \
-#     --ignore={project}/third-party/faiss/tests/test_extra_distances.py \
-#     --ignore={project}/third-party/faiss/tests/test_residual_quantizer.py
-# """
-
-[dependency-groups]
-dev = [
-    "pytest>=8.4.1",
-    "scipy>=1.13.1",
-]
+test-command = """
+pytest {project}/third-party/faiss/tests/ \
+    --ignore={project}/third-party/faiss/tests/test_contrib_with_scipy.py \
+    --ignore={project}/third-party/faiss/tests/test_extra_distances.py \
+    --ignore={project}/third-party/faiss/tests/test_residual_quantizer.py
+"""

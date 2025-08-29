@@ -40,6 +40,7 @@ jobs:
             SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
             SKBUILD_WHEEL_PY_API=cp39
             SKBUILD_BUILD_VERBOSE=true
+            CMAKE_GENERATOR_TOOLSET=ClangCL
             PATH="${PATH};c:/Program Files/OpenBLAS/bin"
             CPATH="${CPATH};c:/Program Files/OpenBLAS/include"
             LIB="${LIB};c:/Program Files/OpenBLAS/lib"
