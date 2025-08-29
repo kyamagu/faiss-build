@@ -1,84 +1,85 @@
-cmake_minimum_required(VERSION 3.15...3.26)
-project(${SKBUILD_PROJECT_NAME} LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.17...4.0)
 
-set(PYTHON_PACKAGE_NAME "faiss")
+# Guard for standalone CMake build instead of scikit-build-core.
+if(NOT "${SKBUILD}" STREQUAL "2")
+  # TODO: extract information from pyproject.toml
+  message(STATUS "Standalone CMake build detected.")
+  set(SKBUILD_PROJECT_NAME
+      "faiss-cpu"
+      CACHE STRING "Project name")
+  set(SKBUILD_PROJECT_VERSION
+      "1.12.0"
+      CACHE STRING "Project version")
+  set(SKBUILD_SABI_VERSION
+      ""
+      CACHE STRING "SABI version")
+  set(SKBUILD_SOABI
+      "abi3"
+      CACHE STRING "SOABI tag")
+endif()
 
-# Build-time options.
-option(FAISS_OPT_LEVEL "Optimization level, one of <generic|avx2|avx512|avx512_spr|sve>" "generic")
+# Project configuration.
+project(
+  ${SKBUILD_PROJECT_NAME}
+  VERSION ${SKBUILD_PROJECT_VERSION}
+  DESCRIPTION "Python bindings for faiss."
+  LANGUAGES CXX)
+
+# Build-time options that override faiss C++ default.
+set(FAISS_OPT_LEVEL
+    "generic"
+    CACHE STRING
+          "Optimization level, one of <generic|avx2|avx512|avx512_spr|sve>")
 option(FAISS_ENABLE_GPU "Enable support for GPU indexes." OFF)
 option(FAISS_USE_LTO "Enable Link Time Optimization (LTO)." ON)
 set(FAISS_ENABLE_EXTRAS OFF)
 set(BUILD_TESTING OFF)
+set(FAISS_ENABLE_PYTHON OFF) # We use our own Python build configuration.
+set(PYTHON_PACKAGE_NAME
+    "faiss"
+    CACHE STRING "Python package name, default to faiss")
+# TODO: Derive the hex value from SKBUILD_SABI_VERSION.
+set(PY_LIMITED_API
+    "0x03080000"
+    CACHE STRING "Py_LIMITED_API macro value")
 
-# Set up platform-specific flags.
-if(APPLE)
+# Print out the SABI configuration.
+include(CMakeDependentOption)
+cmake_dependent_option(ENABLE_SABI "Enable stable ABI." ON
+                       "SKBUILD_SABI_VERSION" OFF)
+message(STATUS "Optimization level - ${FAISS_OPT_LEVEL}")
+message(STATUS "Stable ABI - ${SKBUILD_SABI_VERSION}")
+
+# Global build configuration when this project is the top-level project.
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_CXX_EXTENSIONS OFF)
+
+  # Set up platform-specific global flags.
+  if(APPLE)
     add_compile_options(-Wno-deprecated-declarations)
     add_link_options(-dead_strip)
-elseif(UNIX)
+  elseif(UNIX)
     add_compile_options(-fdata-sections -ffunction-sections)
     add_link_options(-Wl,--gc-sections)
-elseif(WIN32)
-    # /wd4101 unreferenced local variable
-    # /wd4267 conversion from 'size_t' to 'type', possible loss of data
-    # /wd4477 printf formatting
-    # /MD Bugfix: https://bugs.python.org/issue38597
+  elseif(WIN32)
+    # /wd4101 unreferenced local variable /wd4267 conversion from 'size_t' to
+    # 'type', possible loss of data /wd4477 printf formatting /MD Bugfix:
+    # https://bugs.python.org/issue38597
     add_compile_options(/Zc:inline /wd4101 /wd4267 /wd4477 /MD)
     add_link_options(/OPT:ICF /OPT:REF /ignore:4286)
-endif()
+  endif()
 
-# Use ccache if available.
-find_program(CCACHE_FOUND ccache)
-if(CCACHE_FOUND)
-   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+  # Use ccache if available.
+  find_program(CCACHE_FOUND ccache)
+  if(CCACHE_FOUND)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+  endif()
 endif()
 
 # Import symbols from the third-party/faiss directory.
 add_subdirectory(third-party/faiss EXCLUDE_FROM_ALL)
 
-# Helper to install SWIG targets.
-function(install_swig_target name)
-    # Enable the target.
-    set_target_properties(${name} PROPERTIES EXCLUDE_FROM_ALL FALSE)
-
-    # Stable ABI configuration.
-    if(NOT "${SKBUILD_SABI_VERSION}" STREQUAL "")
-        target_compile_definitions(${name} PRIVATE Py_LIMITED_API=0x03080000)
-        if(WIN32)
-            set_target_properties(${name} PROPERTIES SUFFIX ".${SKBUILD_SOABI}.pyd")
-        else()
-            set_target_properties(${name} PROPERTIES SUFFIX ".${SKBUILD_SOABI}${CMAKE_SHARED_MODULE_SUFFIX}")
-        endif()
-    endif()
-
-    # Install the SWIG-generated files and the built shared library.
-    get_property(support_files TARGET ${name} PROPERTY SWIG_SUPPORT_FILES)
-    install(TARGETS ${name} DESTINATION ${PYTHON_PACKAGE_NAME})
-    install(FILES ${support_files} DESTINATION ${PYTHON_PACKAGE_NAME})
-endfunction()
-
-# Install the targets based on the optimization level.
-install_swig_target(swigfaiss)
-if(FAISS_OPT_LEVEL MATCHES "^(avx2|avx512|avx512_spr)$")
-    install_swig_target(swigfaiss_avx2)
-endif()
-if(FAISS_OPT_LEVEL MATCHES "^(avx512|avx512_spr)$")
-    install_swig_target(swigfaiss_avx512)
-endif()
-if(FAISS_OPT_LEVEL STREQUAL "avx512_spr")
-    install_swig_target(swigfaiss_avx512_spr)
-endif()
-if(FAISS_OPT_LEVEL STREQUAL "sve")
-    install_swig_target(swigfaiss_sve)
-endif()
-
-# Install Python source files.
-install(
-    DIRECTORY third-party/faiss/faiss/python/
-    DESTINATION ${PYTHON_PACKAGE_NAME}
-    FILES_MATCHING PATTERN "*.py" PATTERN "setup.py" EXCLUDE
-)
-install(
-    DIRECTORY third-party/faiss/contrib
-    DESTINATION ${PYTHON_PACKAGE_NAME}
-    FILES_MATCHING PATTERN "*.py"
-)
+# Python bindings.
+add_subdirectory(python)
