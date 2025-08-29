@@ -64,7 +64,10 @@ repair-wheel-command = [
 ]
 
 [tool.cibuildwheel.windows]
-repair-wheel-command = ["pipx run delvewheel repair -w {dest_dir} {wheel}"]
+repair-wheel-command = [
+    "pipx run delvewheel repair -w {dest_dir} {wheel}",
+    "pipx run abi3audit --strict --report {wheel}"
+]
 test-requires = ["pytest"]
 # Disable scipy tests on Windows.
 test-command = """

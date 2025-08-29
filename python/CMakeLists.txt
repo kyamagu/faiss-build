@@ -19,6 +19,7 @@ function(configure_sabi_properties target)
     target_compile_definitions(${target}
                                PRIVATE Py_LIMITED_API=${PY_LIMITED_API})
     if(WIN32)
+      message(STATUS "SKBUILD_SOABI - ${SKBUILD_SOABI}")
       set_target_properties(${target} PROPERTIES SUFFIX ".${SKBUILD_SOABI}.pyd")
     else()
       set_target_properties(
@@ -31,6 +32,21 @@ function(configure_sabi_properties target)
     else()
       set_target_properties(${target}
                             PROPERTIES SUFFIX "${CMAKE_SHARED_MODULE_SUFFIX}")
+    endif()
+  endif()
+endfunction()
+
+# Helper to set up GPU-related properties.
+function(configure_gpu_properties target)
+  if(${FAISS_ENABLE_GPU})
+    target_compile_definitions(${target} PRIVATE FAISS_ENABLE_GPU)
+    if(${FAISS_ENABLE_ROCM})
+      target_link_libraries(${target} PRIVATE hip::host)
+    else()
+      target_link_libraries(${target} PRIVATE CUDA::cudart)
+      if(${FAISS_ENABLE_CUVS})
+        target_link_libraries(${target} PRIVATE cuvs::cuvs)
+      endif()
     endif()
   endif()
 endfunction()
@@ -66,31 +82,7 @@ function(configure_extension suffix)
   else()
     set_property(TARGET ${target} PROPERTY SWIG_COMPILE_DEFINITIONS
                                            SWIGWORDSIZE64)
-
-    # Configure GPU extension.
-    if(${FAISS_ENABLE_GPU})
-      set_property(
-        TARGET ${target}
-        APPEND
-        PROPERTY SWIG_COMPILE_DEFINITIONS "GPU_WRAPPER")
-      if(${FAISS_ENABLE_ROCM})
-        set_property(
-          TARGET ${target}
-          APPEND
-          PROPERTY SWIG_COMPILE_DEFINITIONS "FAISS_ENABLE_ROCM")
-        target_link_libraries(${target} PRIVATE hip::host)
-      else()
-        target_link_libraries(${target} PRIVATE CUDA::cudart)
-        if(${FAISS_ENABLE_CUVS})
-          set_property(
-            TARGET ${target}
-            APPEND
-            PROPERTY SWIG_COMPILE_DEFINITIONS "FAISS_ENABLE_CUVS")
-          find_package(cuvs REQUIRED)
-          target_link_libraries(${target} PRIVATE cuvs::cuvs)
-        endif()
-      endif()
-    endif()
+    configure_gpu_properties(${target})
   endif()
 
   # Set up Stable ABI properties.
