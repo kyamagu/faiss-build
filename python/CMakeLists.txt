@@ -120,7 +120,7 @@ target_include_directories(
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../third-party/faiss/)
 target_include_directories(faiss_python_callbacks
                            PRIVATE ${Python_INCLUDE_DIRS})
-if(${ENABLE_SOABI})
+if(${ENABLE_SABI})
   target_compile_definitions(faiss_python_callbacks
                              PRIVATE Py_LIMITED_API=${PY_LIMITED_API})
 endif()
