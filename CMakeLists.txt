@@ -74,6 +74,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   # Use ccache if available.
   find_program(CCACHE_FOUND ccache)
   if(CCACHE_FOUND)
+    message(STATUS "ccache enabled")
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
   endif()
 endif()

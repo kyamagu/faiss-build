@@ -25,3 +25,6 @@ if [[ "$PROCESSOR_IDENTIFIER" == ARM* ]]; then
 else
     install_openblas x64
 fi
+
+# Install ccache
+choco install ccache
