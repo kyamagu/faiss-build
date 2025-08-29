@@ -61,12 +61,18 @@ function(configure_extension suffix)
   if(${WIN32})
     set_property(TARGET ${target} PROPERTY SWIG_COMPILE_DEFINITIONS SWIGWIN)
     target_compile_options(${target} PRIVATE /bigobj)
-  elseif(NOT ${APPLE})
+  elseif(${APPLE})
+    # Nothing here.
+  else()
     set_property(TARGET ${target} PROPERTY SWIG_COMPILE_DEFINITIONS
                                            SWIGWORDSIZE64)
 
     # Configure GPU extension.
     if(${FAISS_ENABLE_GPU})
+      set_property(
+        TARGET ${target}
+        APPEND
+        PROPERTY SWIG_COMPILE_DEFINITIONS "GPU_WRAPPER")
       if(${FAISS_ENABLE_ROCM})
         set_property(
           TARGET ${target}
@@ -74,11 +80,6 @@ function(configure_extension suffix)
           PROPERTY SWIG_COMPILE_DEFINITIONS "FAISS_ENABLE_ROCM")
         target_link_libraries(${target} PRIVATE hip::host)
       else()
-        find_package(CUDAToolkit REQUIRED)
-        set_property(
-          TARGET ${target}
-          APPEND
-          PROPERTY SWIG_COMPILE_DEFINITIONS "GPU_WRAPPER")
         target_link_libraries(${target} PRIVATE CUDA::cudart)
         if(${FAISS_ENABLE_CUVS})
           set_property(
