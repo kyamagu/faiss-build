@@ -18,6 +18,7 @@ function(configure_sabi_properties target)
   if(${ENABLE_SABI})
     target_compile_definitions(${target}
                                PRIVATE Py_LIMITED_API=${PY_LIMITED_API})
+    target_link_libraries(${target} PRIVATE Python::SABIModule)
     if(WIN32)
       if("${SKBUILD_SOABI}" STREQUAL "")
         set(SKBUILD_SOABI "abi3"
@@ -30,6 +31,7 @@ function(configure_sabi_properties target)
                              ".${SKBUILD_SOABI}${CMAKE_SHARED_MODULE_SUFFIX}")
     endif()
   else()
+    target_link_libraries(${target} PRIVATE Python::Module)
     if(WIN32)
       set_target_properties(${target} PROPERTIES SUFFIX ".pyd")
     else()
@@ -90,15 +92,9 @@ function(configure_extension suffix)
 
   # Set up Stable ABI properties.
   configure_sabi_properties(${target})
-  # Linker configuration
   target_include_directories(${target} PRIVATE ${Python_NumPy_INCLUDE_DIRS})
-  target_link_libraries(
-    ${target} PRIVATE "faiss${suffix}" OpenMP::OpenMP_CXX faiss_python_callbacks)
-  if(${ENABLE_SABI})
-    target_link_libraries(${target} PRIVATE Python::SABIModule)
-  else()
-    target_link_libraries(${target} PRIVATE Python::Module)
-  endif()
+  target_link_libraries(${target} PRIVATE "faiss${suffix}" OpenMP::OpenMP_CXX
+                                          faiss_python_callbacks)
 
   # Install the SWIG-generated files and the built shared library.
   get_property(
