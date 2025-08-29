@@ -46,7 +46,8 @@ addopts = [
 archs = "native"
 # cp39 and cp310 aren't supported on Windows ARM64
 # cp314t-win issue: https://gitlab.kitware.com/cmake/cmake/-/issues/26926
-skip = "cp39-win_arm64 cp310-win_arm64 cp314t-win*"
+# cp3*t does not have stable ABI and skip here
+skip = "cp39-win_arm64 cp310-win_arm64 cp3*t-*"
 repair-wheel-command = [
     "pipx run repairwheel -o {dest_dir} {wheel}",
     "pipx run abi3audit --strict --report {wheel}"
