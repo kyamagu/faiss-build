@@ -6,6 +6,14 @@ if(${ENABLE_SABI})
 else()
   find_package(Python REQUIRED COMPONENTS Interpreter Development.Module NumPy)
 endif()
+
+# Workaround FindOpenMP unable to find LLVM on Windows.
+if ("${CMAKE_CXX_COMPILER_ID};${CMAKE_CXX_SIMULATE_ID}" STREQUAL "Clang;MSVC")
+  set(CMAKE_SYSTEM_LIBRARY_PATH
+      "c:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/Llvm/x64/lib/;\
+c:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/Llvm/ARM64/lib/")
+endif()
+
 find_package(OpenMP REQUIRED)
 
 # Find SWIG and set up the build configuration.
