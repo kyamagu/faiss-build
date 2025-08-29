@@ -70,7 +70,10 @@ repair-wheel-command = [
 ]
 # Disable scipy tests on Windows.
 test-requires = ["pytest"]
-test-command = "python -c 'import faiss'"
+test-command = [
+    "python -m sysconfig",
+    "python -c \"import faiss\""
+]
 # test-command = """
 # pytest {project}/third-party/faiss/tests/ \
 #     --ignore={project}/third-party/faiss/tests/test_contrib_with_scipy.py \
