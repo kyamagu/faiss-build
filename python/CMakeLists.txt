@@ -37,6 +37,7 @@ endfunction()
 
 # Helper to build and install faiss SWIG extensions.
 function(configure_extension suffix)
+  # Configure swigfaiss extension.
   set(target "swigfaiss${suffix}")
   set(swig_source_file
       ${CMAKE_CURRENT_SOURCE_DIR}/../third-party/faiss/faiss/python/swigfaiss.swig
@@ -48,22 +49,49 @@ function(configure_extension suffix)
       USE_TARGET_INCLUDE_DIRECTORIES TRUE
       DEPENDS
       "${FAISS_HEADERS};$<$<BOOL:${FAISS_ENABLE_GPU}>:${FAISS_GPU_HEADERS}>"
+      COMPILE_OPTIONS -doxygen
       SWIG_MODULE_NAME ${target})
   swig_add_library(
     ${target}
     TYPE SHARED
     LANGUAGE python
     SOURCES ${swig_source_file})
-  set_target_properties(
-    ${target}
-    PROPERTIES SWIG_COMPILE_OPTIONS -doxygen
-               SWIG_COMPILE_DEFINITIONS
-               "$<$<BOOL:${WIN32}>:SWIGWIN>"
-               "$<AND:$<BOOL:${UNIX}>,$<NOT:$<BOOL:${APPLE}>>>:SWIGWORDSIZE64>"
-               "$<$<BOOL:${FAISS_ENABLE_GPU}>:GPU_WRAPPER>"
-               "$<$<BOOL:${FAISS_ENABLE_ROCM}>:FAISS_ENABLE_ROCM>"
-               "$<$<BOOL:${FAISS_ENABLE_CUVS}>:FAISS_ENABLE_CUVS>")
-  target_compile_options(${target} PRIVATE "$<$<BOOL:${WIN32}>:/bigobj>")
+
+  # Set up platform-specific flags.
+  if(${WIN32})
+    set_property(TARGET ${target} PROPERTY SWIG_COMPILE_DEFINITIONS SWIGWIN)
+    target_compile_options(${target} PRIVATE /bigobj)
+  elseif(NOT ${APPLE})
+    set_property(TARGET ${target} PROPERTY SWIG_COMPILE_DEFINITIONS
+                                           SWIGWORDSIZE64)
+
+    # Configure GPU extension.
+    if(${FAISS_ENABLE_GPU})
+      if(${FAISS_ENABLE_ROCM})
+        set_property(
+          TARGET ${target}
+          APPEND
+          PROPERTY SWIG_COMPILE_DEFINITIONS "FAISS_ENABLE_ROCM")
+        target_link_libraries(${target} PRIVATE hip::host)
+      else()
+        find_package(CUDAToolkit REQUIRED)
+        set_property(
+          TARGET ${target}
+          APPEND
+          PROPERTY SWIG_COMPILE_DEFINITIONS "GPU_WRAPPER")
+        target_link_libraries(${target} PRIVATE CUDA::cudart)
+        if(${FAISS_ENABLE_CUVS})
+          set_property(
+            TARGET ${target}
+            APPEND
+            PROPERTY SWIG_COMPILE_DEFINITIONS "FAISS_ENABLE_CUVS")
+          find_package(cuvs REQUIRED)
+          target_link_libraries(${target} PRIVATE cuvs::cuvs)
+        endif()
+      endif()
+    endif()
+  endif()
+
   # Set up Stable ABI properties.
   configure_sabi_properties(${target})
   # Linker configuration
@@ -72,18 +100,6 @@ function(configure_extension suffix)
     PRIVATE "faiss${suffix}"
             "$<IF:$<BOOL:${ENABLE_SABI}>,Python::SABIModule,Python::Module>"
             Python::NumPy OpenMP::OpenMP_CXX faiss_python_callbacks)
-  if(${FAISS_ENABLE_GPU})
-    if(${FAISS_ENABLE_ROCM})
-      target_link_libraries(${target} PRIVATE hip::host)
-    else()
-      find_package(CUDAToolkit REQUIRED)
-      target_link_libraries(${target} PRIVATE CUDA::cudart)
-      if(${FAISS_ENABLE_CUVS})
-        find_package(cuvs REQUIRED)
-        target_link_libraries(${target} PRIVATE cuvs::cuvs)
-      endif()
-    endif()
-  endif()
 
   # Install the SWIG-generated files and the built shared library.
   get_property(
