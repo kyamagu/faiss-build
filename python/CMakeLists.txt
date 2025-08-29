@@ -54,8 +54,8 @@ function(configure_extension suffix)
                "${FAISS_HEADERS}"
                "$<$<BOOL:${FAISS_ENABLE_GPU}>:${FAISS_GPU_HEADERS}>"
                SWIG_MODULE_NAME ${target}
-               SWIG_FLAGS "$<$<BOOL:${WIN32}>:-DSWIGWIN>"
-               "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:-DSWIGWORDSIZE64>")
+               SWIG_FLAGS "$<$<BOOL:${WIN32}>:-DSWIGWIN>;\
+               $<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:-DSWIGWORDSIZE64>")
   swig_add_library(
     ${target}
     TYPE SHARED
