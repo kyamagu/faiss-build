@@ -16,16 +16,12 @@ jobs:
         include:
           - os: ubuntu-24.04
             opt_level: avx512
-            sabi: cp39
           - os: ubuntu-24.04-arm
             opt_level: sve
-            sabi: cp39
           - os: macos-13
             opt_level: avx2
-            sabi: cp39
           - os: macos-14
             opt_level: generic
-            sabi: cp39
           - os: windows-2022
             opt_level: avx2
           - os: windows-11-arm
@@ -39,18 +35,15 @@ jobs:
         env:
           CIBW_ENVIRONMENT_LINUX: >
             SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
-            SKBUILD_WHEEL_PY_API="${{ matrix.sabi }}"
-            SKBUILD_BUILD_VERBOSE=true
+            SKBUILD_WHEEL_PY_API=cp39
           CIBW_ENVIRONMENT_WINDOWS: >
             SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
-            SKBUILD_BUILD_VERBOSE=true
             PATH="${PATH};c:/Program Files/OpenBLAS/bin"
             CPATH="${CPATH};c:/Program Files/OpenBLAS/include"
             LIB="${LIB};c:/Program Files/OpenBLAS/lib"
           CIBW_ENVIRONMENT_MACOS: >
             SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
-            SKBUILD_WHEEL_PY_API="${{ matrix.sabi }}"
-            SKBUILD_BUILD_VERBOSE=true
+            SKBUILD_WHEEL_PY_API=cp39
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.os == 'macos-13' && '13.0' || '14.0' }}
             OpenMP_ROOT=${{ matrix.os == 'macos-13' && '/usr/local/opt/libomp' || '/opt/homebrew/opt/libomp'}}
           CIBW_BEFORE_ALL: bash scripts/before_${{ runner.os }}.sh
