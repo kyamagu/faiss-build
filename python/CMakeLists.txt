@@ -57,9 +57,9 @@ function(configure_extension suffix)
   set_target_properties(
     ${target}
     PROPERTIES SWIG_COMPILE_OPTIONS -doxygen
-               "$<$<BOOL:${WIN32}>:-DSWIGWIN>"
-               "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:-DSWIGWORDSIZE64>"
                SWIG_COMPILE_DEFINITIONS
+               "$<$<BOOL:${WIN32}>:SWIGWIN>"
+               "$<AND:$<BOOL:${UNIX}>,$<NOT:$<BOOL:${APPLE}>>>:SWIGWORDSIZE64>"
                "$<$<BOOL:${FAISS_ENABLE_GPU}>:GPU_WRAPPER>"
                "$<$<BOOL:${FAISS_ENABLE_ROCM}>:FAISS_ENABLE_ROCM>"
                "$<$<BOOL:${FAISS_ENABLE_CUVS}>:FAISS_ENABLE_CUVS>")
