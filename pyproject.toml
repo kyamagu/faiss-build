@@ -55,6 +55,7 @@ test-requires = ["pytest", "scipy"]
 test-command = "pytest {project}/third-party/faiss/tests"
 
 [tool.cibuildwheel.windows]
+repair-wheel-command = ["pipx run repairwheel -o {dest_dir} {wheel}"]
 test-requires = ["pytest"]
 # Disable scipy tests on Windows.
 test-command = """
