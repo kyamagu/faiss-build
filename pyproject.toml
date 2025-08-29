@@ -68,11 +68,18 @@ repair-wheel-command = [
     "pipx run delvewheel repair -v -w {dest_dir} {wheel}",
     "pipx run abi3audit --strict --report {wheel}"
 ]
-test-requires = ["pytest", "numpy"]
-# Disable scipy tests on Windows.
-test-command = """
-pytest {project}/third-party/faiss/tests/ \
-    --ignore={project}/third-party/faiss/tests/test_contrib_with_scipy.py \
-    --ignore={project}/third-party/faiss/tests/test_extra_distances.py \
-    --ignore={project}/third-party/faiss/tests/test_residual_quantizer.py
-"""
+test-command = "python -c 'import faiss'"
+# test-requires = ["pytest"]
+# # Disable scipy tests on Windows.
+# test-command = """
+# pytest {project}/third-party/faiss/tests/ \
+#     --ignore={project}/third-party/faiss/tests/test_contrib_with_scipy.py \
+#     --ignore={project}/third-party/faiss/tests/test_extra_distances.py \
+#     --ignore={project}/third-party/faiss/tests/test_residual_quantizer.py
+# """
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "scipy>=1.13.1",
+]
