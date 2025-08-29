@@ -92,9 +92,8 @@ function(configure_extension suffix)
   configure_sabi_properties(${target})
   # Linker configuration
   target_link_libraries(
-    ${target} PRIVATE "faiss${suffix}" Python::NumPy OpenMP::OpenMP_CXX
-                      faiss_python_callbacks)
-  if(${ENABLE_SOABI})
+    ${target} PRIVATE "faiss${suffix}" OpenMP::OpenMP_CXX Python::NumPy faiss_python_callbacks)
+  if(${ENABLE_SABI})
     target_link_libraries(${target} PRIVATE Python::SABIModule)
   else()
     target_link_libraries(${target} PRIVATE Python::Module)
