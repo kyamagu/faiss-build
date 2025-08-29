@@ -68,9 +68,9 @@ repair-wheel-command = [
     "pipx run delvewheel repair -v -w {dest_dir} {wheel}",
     "pipx run abi3audit --strict --report {wheel}"
 ]
+# Disable scipy tests on Windows.
+test-requires = ["pytest"]
 test-command = "python -c 'import faiss'"
-# test-requires = ["pytest"]
-# # Disable scipy tests on Windows.
 # test-command = """
 # pytest {project}/third-party/faiss/tests/ \
 #     --ignore={project}/third-party/faiss/tests/test_contrib_with_scipy.py \
