@@ -40,7 +40,7 @@ set(PYTHON_PACKAGE_NAME
     CACHE STRING "Python package name, default to faiss")
 # TODO: Derive the hex value from SKBUILD_SABI_VERSION.
 set(PY_LIMITED_API
-    "0x03080000"
+    "0x03090000"
     CACHE STRING "Py_LIMITED_API macro value")
 
 # Print out the SABI configuration.

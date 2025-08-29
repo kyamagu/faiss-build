@@ -35,7 +35,7 @@ function(configure_sabi_properties target)
   endif()
 endfunction()
 
-# Helper to install SWIG targets.
+# Helper to build and install faiss SWIG extensions.
 function(configure_extension suffix)
   set(target "swigfaiss${suffix}")
   set(swig_source_file
@@ -46,21 +46,24 @@ function(configure_extension suffix)
     PROPERTIES
       CPLUSPLUS ON
       USE_TARGET_INCLUDE_DIRECTORIES TRUE
-      COMPILE_DEFINITIONS "$<$<BOOL:${WIN32}>:/bigobj>"
-      "$<$<BOOL:${FAISS_ENABLE_GPU}>:GPU_WRAPPER>"
-      "$<$<BOOL:${FAISS_ENABLE_ROCM}>:FAISS_ENABLE_ROCM>"
-      "$<$<BOOL:${FAISS_ENABLE_CUVS}>:FAISS_ENABLE_CUVS>" COMPILE_OPTIONS
-      "-doxygen" DEPENDS
-      "${FAISS_HEADERS}" "$<$<BOOL:${FAISS_ENABLE_GPU}>:${FAISS_GPU_HEADERS}>"
-      SWIG_MODULE_NAME ${target}
-      SWIG_FLAGS
-      "$<$<BOOL:${WIN32}>:-DSWIGWIN>$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:-DSWIGWORDSIZE64>"
-  )
+      DEPENDS
+      "${FAISS_HEADERS};$<$<BOOL:${FAISS_ENABLE_GPU}>:${FAISS_GPU_HEADERS}>"
+      SWIG_MODULE_NAME ${target})
   swig_add_library(
     ${target}
     TYPE SHARED
     LANGUAGE python
     SOURCES ${swig_source_file})
+  set_target_properties(
+    ${target}
+    PROPERTIES SWIG_COMPILE_OPTIONS -doxygen
+               "$<$<BOOL:${WIN32}>:-DSWIGWIN>"
+               "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:-DSWIGWORDSIZE64>"
+               SWIG_COMPILE_DEFINITIONS
+               "$<$<BOOL:${FAISS_ENABLE_GPU}>:GPU_WRAPPER>"
+               "$<$<BOOL:${FAISS_ENABLE_ROCM}>:FAISS_ENABLE_ROCM>"
+               "$<$<BOOL:${FAISS_ENABLE_CUVS}>:FAISS_ENABLE_CUVS>")
+  target_compile_options(${target} PRIVATE "$<$<BOOL:${WIN32}>:/bigobj>")
   # Set up Stable ABI properties.
   configure_sabi_properties(${target})
   # Linker configuration
