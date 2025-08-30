@@ -31,9 +31,7 @@ jobs:
         with:
           submodules: true
       - name: Setup MSVC environment
-        uses: TheMrMilchmann/setup-msvc-dev@v3
-        with:
-          export-path-to-vcvarsall: true
+        uses: ilammy/msvc-dev-cmd@v1
         if: runner.os == 'Windows'
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.1.4
