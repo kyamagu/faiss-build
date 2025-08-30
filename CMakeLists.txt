@@ -64,11 +64,8 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     add_compile_options(-fdata-sections -ffunction-sections)
     add_link_options(-Wl,--gc-sections)
   elseif(WIN32)
-    # /wd4101 unreferenced local variable /wd4267 conversion from 'size_t' to
-    # 'type', possible loss of data /wd4477 printf formatting /MD Bugfix:
-    # https://bugs.python.org/issue38597
-    add_compile_options(/Zc:inline /wd4101 /wd4267 /wd4477 /MD)
-    add_link_options(/OPT:ICF /OPT:REF /ignore:4286)
+    add_compile_options(/MT /Zc:inline /wd4101 /wd4267 /wd4477 /Gy)
+    add_link_options(/LTCG /OPT:ICF /OPT:REF /ignore:4286)
   endif()
 
   # Use ccache if available.
