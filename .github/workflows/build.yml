@@ -32,6 +32,8 @@ jobs:
           submodules: true
       - name: Setup MSVC environment
         uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.os == 'windows-11-arm' && 'arm64' || 'x64' }}
         if: runner.os == 'Windows'
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.1.4
