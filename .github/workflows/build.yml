@@ -47,6 +47,7 @@ jobs:
             SKBUILD_BUILD_VERBOSE=true
             CMAKE_BUILD_TYPE=Release
             CMAKE_GENERATOR_TOOLSET=ClangCL
+            SKBUILD_WHEEL_PY_API=cp39
             PATH="${PATH};c:/Program Files/OpenBLAS/bin"
             CPATH="${CPATH};c:/Program Files/OpenBLAS/include"
             LIB="${LIB};c:/Program Files/OpenBLAS/lib"
