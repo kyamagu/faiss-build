@@ -24,8 +24,8 @@ jobs:
           #   opt_level: generic
           - os: windows-2022
             opt_level: avx2
-          # - os: windows-11-arm
-          #   opt_level: generic
+          - os: windows-11-arm
+            opt_level: generic
     steps:
       - uses: actions/checkout@v5
         with:
@@ -42,18 +42,18 @@ jobs:
           CIBW_ENVIRONMENT_LINUX: >
             SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
             SKBUILD_WHEEL_PY_API=cp39
+            CMAKE_BUILD_TYPE=Release
           CIBW_ENVIRONMENT_WINDOWS: >
             SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }};FAISS_USE_LTO=OFF"
             SKBUILD_BUILD_VERBOSE=true
             CMAKE_BUILD_TYPE=Release
-            CMAKE_GENERATOR_TOOLSET=ClangCL
-            SKBUILD_WHEEL_PY_API=cp39
             PATH="${PATH};c:/Program Files/OpenBLAS/bin"
             CPATH="${CPATH};c:/Program Files/OpenBLAS/include"
             LIB="${LIB};c:/Program Files/OpenBLAS/lib"
           CIBW_ENVIRONMENT_MACOS: >
             SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
             SKBUILD_WHEEL_PY_API=cp39
+            CMAKE_BUILD_TYPE=Release
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.os == 'macos-13' && '13.0' || '14.0' }}
             OpenMP_ROOT=${{ matrix.os == 'macos-13' && '/usr/local/opt/libomp' || '/opt/homebrew/opt/libomp'}}
           CIBW_BEFORE_ALL: bash scripts/before_${{ runner.os }}.sh
