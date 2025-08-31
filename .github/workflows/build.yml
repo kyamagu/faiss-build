@@ -22,6 +22,7 @@ jobs:
           CIBW_ENVIRONMENT: >
             SKBUILD_CMAKE_DEFINE="FAISS_ENABLE_GPU=ON"
             CMAKE_BUILD_TYPE=Release
+            CUDA_BIN_PATH=/usr/local/cuda
           CIBW_BEFORE_ALL: bash scripts/before_Linux.sh
 
   build_wheels:
