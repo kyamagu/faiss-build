@@ -3,4 +3,4 @@
 set -eux
 
 # Install system dependencies
-brew install libomp ccache
+brew install libomp
