@@ -24,8 +24,8 @@ jobs:
           #   opt_level: generic
           - os: windows-2022
             opt_level: avx2
-          - os: windows-11-arm
-            opt_level: generic
+          # - os: windows-11-arm
+          #   opt_level: generic
     steps:
       - uses: actions/checkout@v5
         with:
