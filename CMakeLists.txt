@@ -65,7 +65,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     add_link_options(-Wl,--gc-sections)
   elseif(WIN32)
     add_compile_options(/GL /wd4101 /wd4267 /wd4477)
-    add_link_options(/LTCG /OPT:ICF /OPT:REF /ignore:4286)
+    add_link_options(/LTCG /ignore:4286)
   endif()
 
   # Use ccache if available.
