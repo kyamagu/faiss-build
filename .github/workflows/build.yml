@@ -44,6 +44,7 @@ jobs:
             SKBUILD_WHEEL_PY_API=cp39
           CIBW_ENVIRONMENT_WINDOWS: >
             SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
+            SKBUILD_BUILD_VERBOSE=true
             CMAKE_BUILD_TYPE=Release
             CMAKE_GENERATOR_TOOLSET=ClangCL
             PATH="${PATH};c:/Program Files/OpenBLAS/bin"

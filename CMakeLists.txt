@@ -66,6 +66,10 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   elseif(WIN32)
     add_compile_options(/GL /wd4101 /wd4267 /wd4477)
     add_link_options(/LTCG /ignore:4286)
+    if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+      add_compile_options(-Wno-unused-function -Wno-format)
+      add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+    endif()
   endif()
 
   # Use ccache if available.
