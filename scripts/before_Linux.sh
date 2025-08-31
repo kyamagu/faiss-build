@@ -15,3 +15,13 @@ else
     echo "Unsupported package manager. Please install dependencies manually."
     exit 1
 fi
+
+# CUDA installation
+if command -v dnf &> /dev/null; then
+    # TODO: Detect distro and arch here.
+    distro=rhel8
+    arch=x86_64
+    dnf config-manager --set-enabled powertools
+    dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/${distro}/${arch}/cuda-${distro}.repo
+    dnf install -y cuda-toolkit
+fi
