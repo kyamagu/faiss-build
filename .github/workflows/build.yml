@@ -8,7 +8,30 @@ on:
     types: [published]
 
 jobs:
+  build_cuda_wheels:
+    name: Build CUDA wheels on ubuntu-24.04
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+      - uses: Jimver/cuda-toolkit@master
+        with:
+          cuda: "12.8.1"
+          method: "network"
+          sub-packages: '["nvcc", "cudart"]'
+          non-cuda-sub-packages: '["libcublas"]'
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v3.1.4
+        env:
+          CIBW_BUILD: cp39-manylinux_x86_64
+          CIBW_ENVIRONMENT: >
+            SKBUILD_CMAKE_DEFINE="FAISS_ENABLE_GPU=ON"
+            CMAKE_BUILD_TYPE=Release
+          CIBW_BEFORE_ALL: bash scripts/before_Linux.sh
+
   build_wheels:
+    if: false
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
