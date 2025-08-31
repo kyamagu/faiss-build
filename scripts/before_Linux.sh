@@ -61,3 +61,4 @@ function install_cuda() {
 }
 
 install_cuda
+nvcc --version
