@@ -43,7 +43,7 @@ jobs:
             SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
             SKBUILD_WHEEL_PY_API=cp39
           CIBW_ENVIRONMENT_WINDOWS: >
-            SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
+            SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }};FAISS_USE_LTO=OFF"
             SKBUILD_BUILD_VERBOSE=true
             CMAKE_BUILD_TYPE=Release
             CMAKE_GENERATOR_TOOLSET=ClangCL
