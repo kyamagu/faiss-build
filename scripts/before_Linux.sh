@@ -18,10 +18,22 @@ fi
 
 # CUDA installation
 if command -v dnf &> /dev/null; then
-    # TODO: Detect distro and arch here.
-    distro=rhel8
-    arch=x86_64
-    dnf config-manager --set-enabled powertools
-    dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/${distro}/${arch}/cuda-${distro}.repo
-    dnf install -y cuda-toolkit
+    # TODO: Detect DISTRO and ARCH here.
+    DISTRO=rhel8
+    ARCH=x86_64
+    CUDA_VERSION=${CUDA_VERSION:-12.8}
+    CUDA_PACKAGE_VERSION=${CUDA_VERSION//./-}
+    dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/${DISTRO}/${ARCH}/cuda-${DISTRO}.repo
+    dnf install -y \
+        cuda-nvcc-${CUDA_PACKAGE_VERSION} \
+        cuda-nvprof-${CUDA_PACKAGE_VERSION} \
+        cuda-cudart-devel-${CUDA_PACKAGE_VERSION} \
+        libcublas-devel-${CUDA_PACKAGE_VERSION}
+
+    # Set path
+    ln -s cuda-${CUDA_VERSION} /usr/local/cuda && \
+        echo "/usr/local/cuda/lib64" >> /etc/ld.so.conf.d/cuda.conf && \
+        echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
+        echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf && \
+        ldconfig
 fi
