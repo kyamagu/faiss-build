@@ -80,10 +80,10 @@ function(configure_extension suffix)
     SOURCES ${swig_source_file})
 
   # Set up platform-specific flags.
-  if(${WIN32})
+  if(WIN32)
     set_property(TARGET ${target} PROPERTY SWIG_COMPILE_DEFINITIONS SWIGWIN)
     target_compile_options(${target} PRIVATE /bigobj)
-  elseif(${APPLE})
+  elseif(APPLE)
     # Nothing here.
   else()
     set_property(TARGET ${target} PROPERTY SWIG_COMPILE_DEFINITIONS

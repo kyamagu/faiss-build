@@ -58,17 +58,20 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 
   # Set up platform-specific global flags.
   if(APPLE)
-    add_compile_options(-Wno-deprecated-declarations)
+    add_compile_options(-Wno-unused-function -Wno-format -Wno-deprecated-declarations)
     add_link_options(-dead_strip)
   elseif(UNIX)
     add_compile_options(-fdata-sections -ffunction-sections)
     add_link_options(-Wl,--gc-sections)
   elseif(WIN32)
-    # /wd4101 unreferenced local variable /wd4267 conversion from 'size_t' to
-    # 'type', possible loss of data /wd4477 printf formatting /MD Bugfix:
-    # https://bugs.python.org/issue38597
-    add_compile_options(/Zc:inline /wd4101 /wd4267 /wd4477 /MD)
-    add_link_options(/OPT:ICF /OPT:REF /ignore:4286)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+      add_compile_options(/wd4101 /wd4267 /wd4477)
+      add_link_options(/ignore:4217)
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+      add_compile_options(-Wno-unused-function -Wno-format -Wno-deprecated-declarations)
+      add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+      add_link_options(/ignore:4217)
+    endif()
   endif()
 
   # Use ccache if available.
