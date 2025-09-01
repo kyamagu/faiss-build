@@ -77,6 +77,7 @@ function(configure_global_cuda_flags)
   endif()
   # Enable CUDA language support.
   enable_language(CUDA)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-XCompiler=-fdata-sections,-ffunction-sections>)
 endfunction()
 
 # Global build configuration when this project is the top-level project.
