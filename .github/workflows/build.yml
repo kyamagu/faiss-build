@@ -38,7 +38,7 @@ jobs:
         if: runner.os == 'Windows'
       - name: Install OpenBLAS
         shell: pwsh
-        run: ./scripts/install_OpenBLAS_Windows.ps1
+        run: ./scripts/install_OpenBLAS.ps1
         if: runner.os == 'Windows'
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.1.4
