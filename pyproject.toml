@@ -47,6 +47,7 @@ addopts = [
 
 [tool.scikit-build]
 cmake.build-type = "Release"
+build.verbose = true
 # NOTE: You may set CMAKE_GENERATOR_TOOLSET=ClangCL on Windows, but results in broken DLLs on ARM64.
 
 [[tool.scikit-build.overrides]]
