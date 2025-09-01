@@ -47,10 +47,12 @@ addopts = [
 
 [tool.scikit-build]
 cmake.build-type = "Release"
+# NOTE: You may set CMAKE_GENERATOR_TOOLSET=ClangCL on Windows, but results in broken DLLs on ARM64.
 
 [[tool.scikit-build.overrides]]
 if.platform-system = "^(darwin|linux)"
 wheel.py-api = "cp39"
+# NOTE: On Windows, setting wheel.py-api results in broken DLLs.
 
 [tool.cibuildwheel]
 archs = "native"
@@ -62,6 +64,7 @@ test-requires = ["pytest", "scipy"]
 test-command = "pytest {project}/third-party/faiss/tests"
 
 [tool.cibuildwheel.linux]
+before-all = "bash scripts/install_Linux.sh"
 repair-wheel-command = [
     "auditwheel show {wheel}",
     "auditwheel repair -w {dest_dir} {wheel}",
