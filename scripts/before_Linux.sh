@@ -31,7 +31,7 @@ function install_cuda() {
         dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/${DISTRO}/${ARCH}/cuda-${DISTRO}.repo
         dnf install -y \
             cuda-nvcc-${CUDA_PACKAGE_VERSION} \
-            cuda-nvprof-${CUDA_PACKAGE_VERSION} \
+            cuda-profiler-api-${CUDA_PACKAGE_VERSION} \
             cuda-cudart-devel-${CUDA_PACKAGE_VERSION} \
             libcublas-devel-${CUDA_PACKAGE_VERSION} \
             libcurand-devel-${CUDA_PACKAGE_VERSION}
@@ -41,7 +41,7 @@ function install_cuda() {
         dpkg -i cuda-keyring_1.1-1_all.deb
         apt update && apt install -y \
             cuda-nvcc-${CUDA_PACKAGE_VERSION} \
-            cuda-nvprof-${CUDA_PACKAGE_VERSION} \
+            cuda-profiler-api-${CUDA_PACKAGE_VERSION} \
             cuda-cudart-dev-${CUDA_PACKAGE_VERSION} \
             libcublas-dev-${CUDA_PACKAGE_VERSION} \
             libcurand-dev-${CUDA_PACKAGE_VERSION}
