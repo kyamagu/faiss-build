@@ -3,7 +3,7 @@
 set -eux
 
 # Install system dependencies.
-# brew install libomp
+brew install libomp
 
 # Set MACOSX_DEPLOYMENT_TARGET.
 MACOS_VERSION=$(sw_vers -productVersion)
