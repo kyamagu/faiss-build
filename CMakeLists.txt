@@ -75,9 +75,11 @@ function(configure_global_cuda_flags)
   if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
     set(CMAKE_CUDA_ARCHITECTURES all-major)
   endif()
+  if(NOT DEFINED ENV{CUDAFLAGS})
+    set(ENV{CUDAFLAGS} -Wno-deprecated-gpu-targets)
+  endif()
   # Enable CUDA language support.
   enable_language(CUDA)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-XCompiler=-fdata-sections,-ffunction-sections>)
 endfunction()
 
 # Global build configuration when this project is the top-level project.
@@ -102,10 +104,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     if(${FAISS_ENABLE_GPU} AND NOT ${FAISS_ENABLE_ROCM})
       configure_global_cuda_flags()
     endif()
-    add_compile_options(
-      $<$<COMPILE_LANGUAGE:CXX>:-fdata-sections>
-      $<$<COMPILE_LANGUAGE:CXX>:-ffunction-sections>
-    )
+    add_compile_options(-fdata-sections -ffunction-sections)
     add_link_options(-Wl,--gc-sections)
   elseif(WIN32)
     # A few of warning suppressions for Windows.
