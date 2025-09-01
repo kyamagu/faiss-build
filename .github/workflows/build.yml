@@ -14,16 +14,16 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-24.04
-            opt_level: avx512
-          - os: ubuntu-24.04-arm
-            opt_level: sve
-          - os: macos-13
-            opt_level: avx2
-          - os: macos-14
-            opt_level: generic
-          - os: windows-2022
-            opt_level: avx2
+          # - os: ubuntu-24.04
+          #   opt_level: avx512
+          # - os: ubuntu-24.04-arm
+          #   opt_level: sve
+          # - os: macos-13
+          #   opt_level: avx2
+          # - os: macos-14
+          #   opt_level: generic
+          # - os: windows-2022
+          #   opt_level: avx2
           - os: windows-11-arm
             opt_level: generic
     steps:
@@ -36,6 +36,9 @@ jobs:
         with:
           arch: ${{ matrix.os == 'windows-11-arm' && 'arm64' || 'x64' }}
         if: runner.os == 'Windows'
+      - name: Install OpenBLAS
+        run: bash scripts/install_OpenBLAS_Windows.sh
+        if: runner.os == 'Windows'
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.1.4
         env:
@@ -47,9 +50,6 @@ jobs:
           # NOTE: You may set CMAKE_GENERATOR_TOOLSET=ClangCL, but results in broken DLLs on ARM64.
           CIBW_ENVIRONMENT_WINDOWS: >
             SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
-            PATH="${PATH};c:/Program Files/OpenBLAS/bin"
-            CPATH="${CPATH};c:/Program Files/OpenBLAS/include"
-            LIB="${LIB};c:/Program Files/OpenBLAS/lib"
           CIBW_ENVIRONMENT_MACOS: >
             SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.os == 'macos-13' && '13.0' || '14.0' }}
@@ -60,8 +60,9 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_cuda_wheels:
-    name: Build CUDA wheels on ubuntu-24.04
+    name: Build CUDA wheels
     runs-on: ubuntu-24.04
+    if: false
     steps:
       - uses: actions/checkout@v5
         with:
