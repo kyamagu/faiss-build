@@ -97,7 +97,13 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     if(NOT DEFINED OpenMP_ROOT)
       find_program(HOMEBREW_FOUND brew)
       if(HOMEBREW_FOUND)
-        set(OpenMP_ROOT "$ENV{HOMEBREW_PREFIX}/opt/libomp")
+        execute_process(
+          COMMAND brew --prefix libomp
+          OUTPUT_VARIABLE HOMEBREW_LIBOMP_PREFIX
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        set(OpenMP_ROOT "${HOMEBREW_LIBOMP_PREFIX}" CACHE PATH "OpenMP root from Homebrew")
+      endif()
       endif()
     endif()
   elseif(UNIX)
