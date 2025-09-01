@@ -76,12 +76,11 @@ function(configure_cuda_global_flags)
     set(CMAKE_CUDA_ARCHITECTURES all-major)
   endif()
   if(NOT DEFINED CMAKE_CUDA_FLAGS)
-    set(CMAKE_CUDA_FLAGS -Wno-deprecated-gpu-targets)
+    set(CMAKE_CUDA_FLAGS -Xcompiler=-ffunction-sections,-fdata-sections)
   endif()
   # enable_language(CUDA)
   # add_compile_options(
-  #   $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-ffunction-sections>
-  #   $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-fdata-sections>
+  #   $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-ffunction-sections,-fdata-sections>
   # )
 endfunction()
 
