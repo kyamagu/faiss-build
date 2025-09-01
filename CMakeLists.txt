@@ -42,8 +42,10 @@ if(DEFINED ENV{FAISS_ENABLE_GPU})
       $ENV{FAISS_ENABLE_GPU}
       CACHE BOOL "Enable support for GPU indexes." FORCE)
 endif()
-
+option(FAISS_ENABLE_ROCM "Enable support for ROCm" OFF)
+option(FAISS_ENABLE_CUVS "Enable support for cuVS" OFF)
 option(FAISS_USE_LTO "Enable Link Time Optimization (LTO)." ON)
+
 set(FAISS_ENABLE_EXTRAS OFF)
 set(BUILD_TESTING OFF)
 set(FAISS_ENABLE_PYTHON OFF) # We use our own Python build configuration.
