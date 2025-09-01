@@ -18,9 +18,9 @@ function install_openblas() {
     powershell.exe -Command "Remove-Item '$INSTALL_DIR/OpenBLAS*' -Recurse"
 
     # Set GITHUB_ENV
-    echo "PATH=${PATH};c:/Program Files/OpenBLAS/bin" >> $GITHUB_ENV
-    echo "CPATH=${CPATH};c:/Program Files/OpenBLAS/include" >> $GITHUB_ENV
-    echo "LIB=${LIB};c:/Program Files/OpenBLAS/lib" >> $GITHUB_ENV
+    echo "PATH=${PATH:-}:/c/Program Files/OpenBLAS/bin" >> $GITHUB_ENV
+    echo "CPATH=${CPATH:-}:/c/Program Files/OpenBLAS/include" >> $GITHUB_ENV
+    echo "LIB=${LIB:-}:/c/Program Files/OpenBLAS/lib" >> $GITHUB_ENV
 }
 
 # Install system dependencies
