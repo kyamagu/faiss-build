@@ -37,7 +37,8 @@ jobs:
           arch: ${{ matrix.os == 'windows-11-arm' && 'arm64' || 'x64' }}
         if: runner.os == 'Windows'
       - name: Install OpenBLAS
-        run: pwsh scripts/install_OpenBLAS_Windows.ps1
+        shell: pwsh
+        run: ./scripts/install_OpenBLAS_Windows.ps1
         if: runner.os == 'Windows'
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.1.4
