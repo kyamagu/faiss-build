@@ -66,10 +66,17 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     if(${FAISS_ENABLE_GPU})
       if(${FAISS_ENABLE_ROCM})
       else()
+        # For some reason, FindCUDAToolkit fails to find nvcc without explicit PATH setup.
+        find_program(NVCC_FOUND nvcc)
+        if(NOT NVCC_FOUND)
+          set(CMAKE_CUDA_COMPILER /usr/local/cuda/bin/nvcc)
+        endif()
+        # Set default CUDA architecture to all-major.
         if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
           set(CMAKE_CUDA_ARCHITECTURES all-major)
           set(CMAKE_CUDA_FLAGS -Wno-deprecated-gpu-targets)
         endif()
+        # Enable CUDA.
         enable_language(CUDA)
       endif()
     endif()
