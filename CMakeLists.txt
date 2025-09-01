@@ -79,13 +79,9 @@ function(configure_cuda_global_flags)
   # Suppress deprecation warnings by default as the library targets many
   # architectures.
   if(NOT DEFINED CMAKE_CUDA_FLAGS)
-    set(CMAKE_CUDA_FLAGS -Wno-deprecated-gpu-targets)
+    set(CMAKE_CUDA_FLAGS -Xcompiler=-ffunction-sections
+                         -Xcompiler=-fdata-sections -Wno-deprecated-gpu-targets)
   endif()
-  enable_language(CUDA)
-  add_compile_options(
-    $<$<COMPILE_LANGUAGE:CXX>:-fdata-sections -ffunction-sections>
-    $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-fdata-sections -Xcompiler=-ffunction-sections>
-  )
 endfunction()
 
 # Global build configuration when this project is the top-level project.
