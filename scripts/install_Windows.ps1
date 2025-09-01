@@ -24,9 +24,9 @@ function Install-OpenBLAS {
     }
 
     # Set environment variables for GitHub Actions
-    Add-Content -Path $env:GITHUB_ENV -Value "PATH=$env:PATH;C:\Program Files\OpenBLAS\bin"
-    Add-Content -Path $env:GITHUB_ENV -Value "CPATH=$env:CPATH;C:\Program Files\OpenBLAS\include"
-    Add-Content -Path $env:GITHUB_ENV -Value "LIB=$env:LIB;C:\Program Files\OpenBLAS\lib"
+    Add-Content -Path $env:GITHUB_ENV -Value "PATH=$env:PATH;$INSTALL_DIR\bin"
+    Add-Content -Path $env:GITHUB_ENV -Value "CPATH=$env:CPATH;$INSTALL_DIR\include"
+    Add-Content -Path $env:GITHUB_ENV -Value "LIB=$env:LIB;$INSTALL_DIR\lib"
 }
 
 # Install system dependencies
