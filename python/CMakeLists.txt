@@ -55,12 +55,19 @@ endfunction()
 function(configure_gpu_properties target)
   if(${FAISS_ENABLE_GPU})
     target_compile_definitions(${target} PRIVATE FAISS_ENABLE_GPU)
+    set_property(TARGET ${target} APPEND PROPERTY SWIG_COMPILE_DEFINITIONS GPU_WRAPPER)
     if(${FAISS_ENABLE_ROCM})
       target_link_libraries(${target} PRIVATE hip::host)
+      set_property(TARGET ${target} APPEND PROPERTY
+                                           SWIG_COMPILE_DEFINITIONS
+                                           FAISS_ENABLE_ROCM)
     else()
       target_link_libraries(${target} PRIVATE CUDA::cudart CUDA::cublas)
       if(${FAISS_ENABLE_CUVS})
         target_link_libraries(${target} PRIVATE cuvs::cuvs)
+        set_property(TARGET ${target} APPEND PROPERTY
+                                            SWIG_COMPILE_DEFINITIONS
+                                            FAISS_ENABLE_CUVS)
       endif()
     endif()
   endif()
@@ -116,23 +123,26 @@ function(configure_extension suffix)
 endfunction()
 
 # Build the callback lib.
-add_library(
-  faiss_python_callbacks STATIC EXCLUDE_FROM_ALL
-  ${CMAKE_CURRENT_SOURCE_DIR}/../third-party/faiss/faiss/python/python_callbacks.cpp
-)
-set_property(TARGET faiss_python_callbacks PROPERTY POSITION_INDEPENDENT_CODE
-                                                    ON)
-target_include_directories(
-  faiss_python_callbacks
-  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../third-party/faiss/)
-target_include_directories(faiss_python_callbacks
-                           PRIVATE ${Python_INCLUDE_DIRS})
-if(${ENABLE_SABI})
-  target_compile_definitions(faiss_python_callbacks
-                             PRIVATE Py_LIMITED_API=${PY_LIMITED_API})
-endif()
+function(configure_callback_lib) {
+  add_library(
+    faiss_python_callbacks STATIC EXCLUDE_FROM_ALL
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third-party/faiss/faiss/python/python_callbacks.cpp
+  )
+  set_property(TARGET faiss_python_callbacks PROPERTY POSITION_INDEPENDENT_CODE
+                                                      ON)
+  target_include_directories(
+    faiss_python_callbacks
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../third-party/faiss/)
+  target_include_directories(faiss_python_callbacks
+                            PRIVATE ${Python_INCLUDE_DIRS})
+  if(${ENABLE_SABI})
+    target_compile_definitions(faiss_python_callbacks
+                              PRIVATE Py_LIMITED_API=${PY_LIMITED_API})
+  endif()
+}
 
 # Build extensions based on the optimization level.
+configure_callback_lib()
 configure_extension("")
 if(FAISS_OPT_LEVEL MATCHES "^(avx2|avx512|avx512_spr)$")
   configure_extension(_avx2)

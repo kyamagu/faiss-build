@@ -3,18 +3,19 @@
 set -eux
 
 # OpenBLAS installation
-if command -v apk &> /dev/null; then
-    apk add --no-cache openblas-dev
-elif command -v dnf &> /dev/null; then
-    dnf install -y openblas-devel
-elif command -v apt &> /dev/null; then
-    apt install -y libopenblas-dev
-elif command -v yum &> /dev/null; then
-    yum install -y openblas-devel
-else
-    echo "Unsupported package manager. Please install dependencies manually."
-    exit 1
-fi
+function install_openblas() {
+    if command -v apk &> /dev/null; then
+        apk add --no-cache openblas-dev
+    elif command -v dnf &> /dev/null; then
+        dnf install -y openblas-devel
+    elif command -v apt &> /dev/null; then
+        apt install -y libopenblas-dev
+    elif command -v yum &> /dev/null; then
+        yum install -y openblas-devel
+    else
+        echo "Unsupported package manager. Please install OpenBLAS manually."
+    fi
+}
 
 # CUDA installation
 function install_cuda() {
@@ -45,7 +46,12 @@ function install_cuda() {
             cuda-cudart-dev-${CUDA_PACKAGE_VERSION} \
             libcublas-dev-${CUDA_PACKAGE_VERSION} \
             libcurand-dev-${CUDA_PACKAGE_VERSION}
+    else
+        echo "Unsupported package manager. Please install CUDA Toolkit manually."
     fi
 }
 
-install_cuda
+install_openblas
+if [ "${FAISS_ENABLE_GPU:-OFF}" = "ON" ]; then
+    install_cuda
+fi

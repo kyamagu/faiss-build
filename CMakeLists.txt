@@ -25,12 +25,24 @@ project(
   DESCRIPTION "Python bindings for faiss."
   LANGUAGES CXX)
 
-# Build-time options that override faiss C++ default.
+# Configuration options that override faiss C++ default.
 set(FAISS_OPT_LEVEL
     "generic"
     CACHE STRING
           "Optimization level, one of <generic|avx2|avx512|avx512_spr|sve>")
+if(DEFINED ENV{FAISS_OPT_LEVEL})
+  set(FAISS_OPT_LEVEL
+      $ENV{FAISS_OPT_LEVEL}
+      CACHE STRING "Optimization level." FORCE)
+endif()
+
 option(FAISS_ENABLE_GPU "Enable support for GPU indexes." OFF)
+if(DEFINED ENV{FAISS_ENABLE_GPU})
+  set(FAISS_ENABLE_GPU
+      $ENV{FAISS_ENABLE_GPU}
+      CACHE BOOL "Enable support for GPU indexes." FORCE)
+endif()
+
 option(FAISS_USE_LTO "Enable Link Time Optimization (LTO)." ON)
 set(FAISS_ENABLE_EXTRAS OFF)
 set(BUILD_TESTING OFF)
@@ -58,24 +70,28 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 
   # Set up platform-specific global flags.
   if(APPLE)
-    add_compile_options(-Wno-unused-function -Wno-format -Wno-deprecated-declarations)
+    add_compile_options(-Wno-unused-function -Wno-format
+                        -Wno-deprecated-declarations)
     add_link_options(-dead_strip)
   elseif(UNIX)
     add_compile_options(-fdata-sections -ffunction-sections)
     add_link_options(-Wl,--gc-sections)
     if(${FAISS_ENABLE_GPU})
       if(${FAISS_ENABLE_ROCM})
+
       else()
-        # Enabling CUDA language support requires nvcc available.
         find_package(CUDAToolkit REQUIRED)
         if(NOT DEFINED CMAKE_CUDA_COMPILER)
+          # Enabling CUDA language support requires nvcc available. Here, we use
+          # FindCUDAToolkit to detect nvcc executable.
           set(CMAKE_CUDA_COMPILER ${CUDAToolkit_NVCC_EXECUTABLE})
         endif()
         # Set default CUDA architecture to all-major.
         if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
           set(CMAKE_CUDA_ARCHITECTURES all-major)
         endif()
-        # Suppress deprecation warnings by default as the library targets many architectures.
+        # Suppress deprecation warnings by default as the library targets many
+        # architectures.
         if(NOT DEFINED CMAKE_CUDA_FLAGS)
           set(CMAKE_CUDA_FLAGS -Wno-deprecated-gpu-targets)
         endif()
@@ -86,7 +102,8 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
       add_compile_options(/wd4101 /wd4267 /wd4477)
       add_link_options(/ignore:4217)
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-      add_compile_options(-Wno-unused-function -Wno-format -Wno-deprecated-declarations)
+      add_compile_options(-Wno-unused-function -Wno-format
+                          -Wno-deprecated-declarations)
       add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
       add_link_options(/ignore:4217)
     endif()
@@ -100,7 +117,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   endif()
 endif()
 
-# Import symbols from the third-party/faiss directory.
+# Import targets from the third-party/faiss directory.
 add_subdirectory(third-party/faiss EXCLUDE_FROM_ALL)
 
 # Python bindings.
