@@ -16,7 +16,8 @@ if(${FAISS_ENABLE_GPU})
   else()
     find_package(CUDAToolkit REQUIRED)
     # TODO: Better approach to rewrite compiler flags.
-    target_compile_options(faiss_gpu_objs
+    target_compile_options(
+      faiss_gpu_objs
       PRIVATE
         $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-ffunction-sections,-fdata-sections>
     )
@@ -37,8 +38,7 @@ function(configure_python_properties target)
     target_link_libraries(${target} PRIVATE Python::SABIModule)
     if(WIN32)
       if("${SKBUILD_SOABI}" STREQUAL "")
-        set(SKBUILD_SOABI "abi3"
-        )# https://github.com/scikit-build/scikit-build-core/issues/690
+        set(SKBUILD_SOABI "abi3")
       endif()
       set_target_properties(${target} PROPERTIES SUFFIX ".${SKBUILD_SOABI}.pyd")
     else()

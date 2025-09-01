@@ -25,7 +25,7 @@ project(
   DESCRIPTION "Python bindings for faiss."
   LANGUAGES CXX)
 
-# Configuration options that override faiss C++ default.
+# Configuration options that may override faiss default.
 set(FAISS_OPT_LEVEL
     "generic"
     CACHE STRING
