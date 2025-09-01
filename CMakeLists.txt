@@ -71,6 +71,7 @@ function(configure_cuda_global_flags)
     # FindCUDAToolkit to detect nvcc executable.
     set(CMAKE_CUDA_COMPILER ${CUDAToolkit_NVCC_EXECUTABLE})
   endif()
+  message(STATUS "CUDA compiler - ${CMAKE_CUDA_COMPILER}")
   # Set default CUDA architecture to all-major.
   if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
     set(CMAKE_CUDA_ARCHITECTURES all-major)
