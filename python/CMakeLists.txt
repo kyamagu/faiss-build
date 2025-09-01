@@ -123,7 +123,7 @@ function(configure_extension suffix)
 endfunction()
 
 # Build the callback lib.
-function(configure_callback_lib) {
+function(configure_callback_lib)
   add_library(
     faiss_python_callbacks STATIC EXCLUDE_FROM_ALL
     ${CMAKE_CURRENT_SOURCE_DIR}/../third-party/faiss/faiss/python/python_callbacks.cpp
@@ -139,7 +139,7 @@ function(configure_callback_lib) {
     target_compile_definitions(faiss_python_callbacks
                               PRIVATE Py_LIMITED_API=${PY_LIMITED_API})
   endif()
-}
+endfunction()
 
 # Build extensions based on the optimization level.
 configure_callback_lib()
