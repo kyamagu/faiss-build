@@ -66,14 +66,14 @@ message(STATUS "Stable ABI - ${SKBUILD_SABI_VERSION}")
 # Helper to configure default CUDA setup.
 function(configure_global_cuda_flags)
   find_package(CUDAToolkit REQUIRED)
-  if(NOT DEFINED CMAKE_CUDA_COMPILER)
+  if(NOT DEFINED ENV{CUDACXX})
     # Enabling CUDA language support requires nvcc available. Here, we use
     # FindCUDAToolkit to detect nvcc executable.
-    set(CMAKE_CUDA_COMPILER ${CUDAToolkit_NVCC_EXECUTABLE})
+    set(ENV{CUDACXX} ${CUDAToolkit_NVCC_EXECUTABLE})
   endif()
   # Set default CUDA architecture to all-major.
-  if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-    set(CMAKE_CUDA_ARCHITECTURES all-major)
+  if(NOT DEFINED ENV{CUDAARCHS})
+    set(ENV{CUDAARCHS} all-major)
   endif()
   if(NOT DEFINED ENV{CUDAFLAGS})
     set(ENV{CUDAFLAGS} -Wno-deprecated-gpu-targets)
