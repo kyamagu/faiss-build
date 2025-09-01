@@ -102,7 +102,10 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     if(${FAISS_ENABLE_GPU} AND NOT ${FAISS_ENABLE_ROCM})
       configure_global_cuda_flags()
     endif()
-    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fdata-sections -ffunction-sections>)
+    add_compile_options(
+      $<$<COMPILE_LANGUAGE:CXX>:-fdata-sections>
+      $<$<COMPILE_LANGUAGE:CXX>:-ffunction-sections>
+    )
     add_link_options(-Wl,--gc-sections)
   elseif(WIN32)
     # A few of warning suppressions for Windows.
