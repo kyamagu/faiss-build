@@ -49,8 +49,7 @@ addopts = [
 cmake.build-type = "Release"
 
 [[tool.scikit-build.overrides]]
-if.any.platform-system = "^darwin"
-if.any.platform-system = "^linux"
+if.platform-system = "^(darwin|linux)"
 wheel.py-api = "cp39"
 
 [tool.cibuildwheel]
