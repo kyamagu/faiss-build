@@ -56,6 +56,7 @@ test-command = "pytest {project}/third-party/faiss/tests"
 
 [tool.cibuildwheel.linux]
 repair-wheel-command = [
+    "auditwheel show {wheel}",
     "auditwheel repair -w {dest_dir} {wheel}",
     "pipx run abi3audit --strict --report {wheel}"
 ]
