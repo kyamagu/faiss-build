@@ -67,4 +67,3 @@ jobs:
           CIBW_ENVIRONMENT: >
             SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=generic"
             FAISS_ENABLE_GPU=ON
-          CIBW_BEFORE_ALL: bash scripts/before_Linux.sh
