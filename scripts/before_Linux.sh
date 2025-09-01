@@ -34,13 +34,6 @@ function install_cuda() {
             cuda-nvprof-${CUDA_PACKAGE_VERSION} \
             cuda-cudart-devel-${CUDA_PACKAGE_VERSION} \
             libcublas-devel-${CUDA_PACKAGE_VERSION}
-
-        # Set path
-        ln -s cuda-${CUDA_VERSION} /usr/local/cuda && \
-            echo "/usr/local/cuda/lib64" >> /etc/ld.so.conf.d/cuda.conf && \
-            echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
-            echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf && \
-            ldconfig
     elif command -v apt &> /dev/null; then
         DISTRO=${DISTRO:-ubuntu2404}
         wget https://developer.download.nvidia.com/compute/cuda/repos/${DISTRO}/${ARCH}/cuda-keyring_1.1-1_all.deb
@@ -50,13 +43,6 @@ function install_cuda() {
             cuda-nvprof-${CUDA_PACKAGE_VERSION} \
             cuda-cudart-dev-${CUDA_PACKAGE_VERSION} \
             libcublas-dev-${CUDA_PACKAGE_VERSION}
-
-        # Set path
-        ln -s cuda-${CUDA_VERSION} /usr/local/cuda && \
-            echo "/usr/local/cuda/lib64" >> /etc/ld.so.conf.d/cuda.conf && \
-            echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
-            echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf && \
-            ldconfig
     fi
 }
 
