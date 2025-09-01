@@ -69,7 +69,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
         # Enabling CUDA language support requires nvcc available.
         find_package(CUDAToolkit REQUIRED)
         if(NOT DEFINED CMAKE_CUDA_COMPILER)
-          set(CMAKE_CUDA_COMPILER CUDAToolkit_NVCC_EXECUTABLE)
+          set(CMAKE_CUDA_COMPILER ${CUDAToolkit_NVCC_EXECUTABLE})
         endif()
         # Set default CUDA architecture to all-major.
         if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
