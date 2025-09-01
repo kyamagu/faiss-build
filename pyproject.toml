@@ -45,6 +45,17 @@ addopts = [
     "--deselect=third-party/faiss/tests/test_contrib.py::TestClustering::test_ivf_train_2level",
 ]
 
+[tool.scikit-build]
+cmake.build-type = "Release"
+
+[[tool.scikit-build.overrides]]
+if.platform-system = "^darwin"
+wheel.py-api = "cp39"
+
+[[tool.scikit-build.overrides]]
+if.platform-system = "^linux"
+wheel.py-api = "cp39"
+
 [tool.cibuildwheel]
 archs = "native"
 # cp39 and cp310 aren't supported on Windows ARM64
