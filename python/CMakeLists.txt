@@ -9,6 +9,15 @@ endif()
 
 find_package(OpenMP REQUIRED)
 
+# Find GPU support.
+if(${FAISS_ENABLE_GPU})
+  if(${FAISS_ENABLE_ROCM})
+    find_package(hip REQUIRED)
+  else()
+    find_package(CUDAToolkit REQUIRED)
+  endif()
+endif()
+
 # Find SWIG and set up the build configuration.
 include(${SWIG_USE_FILE})
 set(UseSWIG_TARGET_NAME_PREFERENCE STANDARD)
