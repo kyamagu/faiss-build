@@ -51,8 +51,7 @@ set(PYTHON_PACKAGE_NAME
     "faiss"
     CACHE STRING "Python package name, default to faiss")
 
-# SABI options.
-# TODO: Derive the hex value from SKBUILD_SABI_VERSION.
+# SABI options. TODO: Derive the hex value from SKBUILD_SABI_VERSION.
 set(PY_LIMITED_API
     "0x03090000"
     CACHE STRING "Py_LIMITED_API macro value")
@@ -93,11 +92,14 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
                         -Wno-deprecated-declarations)
     add_link_options(-dead_strip)
   elseif(UNIX)
-    add_compile_options(-fdata-sections -ffunction-sections)
-    add_link_options(-Wl,--gc-sections)
     if(${FAISS_ENABLE_GPU} AND NOT ${FAISS_ENABLE_ROCM})
       configure_cuda_global_flags()
     endif()
+    add_compile_options(
+      $<$<COMPILE_LANGUAGE:CXX>:-fdata-sections -ffunction-sections>
+      $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-fdata-sections -Xcompiler=-ffunction-sections>
+    )
+    add_link_options(-Wl,--gc-sections)
   elseif(WIN32)
     # A few of warning suppressions for Windows.
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
