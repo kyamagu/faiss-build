@@ -21,6 +21,7 @@ jobs:
           CIBW_BUILD: cp39-manylinux_x86_64
           CIBW_ENVIRONMENT: >
             SKBUILD_CMAKE_DEFINE="FAISS_ENABLE_GPU=ON"
+            SKBUILD_BUILD_VERBOSE=true
             CMAKE_BUILD_TYPE=Release
             CUDAToolkit_ROOT=/usr/local/cuda
             PATH=${PATH}:/usr/local/cuda/bin

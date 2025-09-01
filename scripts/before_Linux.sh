@@ -2,7 +2,7 @@
 
 set -eux
 
-# Install system dependencies
+# OpenBLAS installation
 if command -v apk &> /dev/null; then
     apk add --no-cache openblas-dev
 elif command -v dnf &> /dev/null; then
@@ -33,7 +33,8 @@ function install_cuda() {
             cuda-nvcc-${CUDA_PACKAGE_VERSION} \
             cuda-nvprof-${CUDA_PACKAGE_VERSION} \
             cuda-cudart-devel-${CUDA_PACKAGE_VERSION} \
-            libcublas-devel-${CUDA_PACKAGE_VERSION}
+            libcublas-devel-${CUDA_PACKAGE_VERSION} \
+            libcurand-devel-${CUDA_PACKAGE_VERSION}
     elif command -v apt &> /dev/null; then
         DISTRO=${DISTRO:-ubuntu2404}
         wget https://developer.download.nvidia.com/compute/cuda/repos/${DISTRO}/${ARCH}/cuda-keyring_1.1-1_all.deb
@@ -42,7 +43,8 @@ function install_cuda() {
             cuda-nvcc-${CUDA_PACKAGE_VERSION} \
             cuda-nvprof-${CUDA_PACKAGE_VERSION} \
             cuda-cudart-dev-${CUDA_PACKAGE_VERSION} \
-            libcublas-dev-${CUDA_PACKAGE_VERSION}
+            libcublas-dev-${CUDA_PACKAGE_VERSION} \
+            libcurand-dev-${CUDA_PACKAGE_VERSION}
     fi
 }
 
