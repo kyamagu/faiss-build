@@ -40,6 +40,8 @@ message(STATUS "Stable ABI - ${SKBUILD_SABI_VERSION}")
 function(configure_default_options)
   set(CMAKE_CXX_STANDARD 17)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_CXX_EXTENSIONS OFF)
+  message(STATUS "C++ standard - ${CMAKE_CXX_STANDARD}")
 
   # Set up platform-specific global flags.
   if(APPLE)
@@ -87,6 +89,7 @@ function(configure_apple_platform)
       set(ENV{MACOSX_DEPLOYMENT_TARGET} 10.14)
     endif()
   endif()
+  message(STATUS "MACOSX_DEPLOYMENT_TARGET - $ENV{MACOSX_DEPLOYMENT_TARGET}")
 endfunction()
 
 # Helper to configure Win32 platform
