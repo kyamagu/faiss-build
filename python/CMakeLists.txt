@@ -15,6 +15,11 @@ if(${FAISS_ENABLE_GPU})
     find_package(hip REQUIRED)
   else()
     find_package(CUDAToolkit REQUIRED)
+    # TODO: Better approach to rewrite compiler flags.
+    target_compile_options(faiss_gpu_objs
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-ffunction-sections,-fdata-sections>
+    )
   endif()
 endif()
 
@@ -52,21 +57,9 @@ function(configure_python_properties target)
   endif()
 endfunction()
 
-# Helper to rewrite compile flags for CUDA targets.
-function(rewrite_cuda_compile_flags target)
-    get_property(flags TARGET ${target} PROPERTY INTERFACE_COMPILE_OPTIONS)
-    if(NOT "${flags}" STREQUAL "")
-        string(REPLACE ";" "," concat_flags "${flags}")
-        set_property(TARGET ${target} PROPERTY INTERFACE_COMPILE_OPTIONS
-            "$<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CXX>>:${flags}>$<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CUDA>>:-Xcompiler=${concat_flags}>"
-            )
-    endif()
-endfunction()
-
 # Helper to set up GPU-related properties.
 function(configure_gpu_properties target)
   target_compile_definitions(${target} PRIVATE FAISS_ENABLE_GPU)
-  rewrite_cuda_compile_flags(faiss_gpu_objs)
   set_property(
     TARGET ${target}
     APPEND
