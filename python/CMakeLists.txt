@@ -15,6 +15,13 @@ if(${FAISS_ENABLE_GPU})
     find_package(hip REQUIRED)
   else()
     find_package(CUDAToolkit REQUIRED)
+    # Default compile flags for faiss GPU objects.
+    target_compile_options(
+      faiss_gpu_objs
+      PRIVATE
+        -Wno-deprecated-gpu-targets
+        $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-ffunction-sections,-fdata-sections>
+    )
   endif()
 endif()
 
