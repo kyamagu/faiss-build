@@ -42,19 +42,19 @@ jobs:
           # NOTE: CMAKE_BUILD_TYPE=Release removes debugging symbols.
           # TODO: Isolate platform-specific environment setup in a separate step.
           CIBW_ENVIRONMENT_LINUX: >
-            FAISS_OPT_LEVEL=${{ matrix.opt_level }}
+            SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
             SKBUILD_WHEEL_PY_API=cp39
             CMAKE_BUILD_TYPE=Release
           # NOTE: On Windows, setting SKBUILD_WHEEL_PY_API results in broken DLLs.
           # NOTE: You may set CMAKE_GENERATOR_TOOLSET=ClangCL, but results in broken DLLs on ARM64.
           CIBW_ENVIRONMENT_WINDOWS: >
-            FAISS_OPT_LEVEL=${{ matrix.opt_level }}
+            SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
             CMAKE_BUILD_TYPE=Release
             PATH="${PATH};c:/Program Files/OpenBLAS/bin"
             CPATH="${CPATH};c:/Program Files/OpenBLAS/include"
             LIB="${LIB};c:/Program Files/OpenBLAS/lib"
           CIBW_ENVIRONMENT_MACOS: >
-            FAISS_OPT_LEVEL=${{ matrix.opt_level }}
+            SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
             SKBUILD_WHEEL_PY_API=cp39
             CMAKE_BUILD_TYPE=Release
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.os == 'macos-13' && '13.0' || '14.0' }}
@@ -77,7 +77,6 @@ jobs:
           CIBW_BUILD: cp3*-manylinux_x86_64
           CIBW_ENVIRONMENT: >
             FAISS_ENABLE_GPU=ON
-            FAISS_OPT_LEVEL=generic
             SKBUILD_WHEEL_PY_API=cp39
             CMAKE_BUILD_TYPE=Release
           CIBW_BEFORE_ALL: bash scripts/before_Linux.sh
