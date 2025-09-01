@@ -56,7 +56,6 @@ jobs:
   build_cuda_wheels:
     name: Build CUDA wheels
     runs-on: ubuntu-24.04
-    if: false
     steps:
       - uses: actions/checkout@v5
         with:
