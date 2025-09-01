@@ -64,7 +64,7 @@ message(STATUS "Optimization level - ${FAISS_OPT_LEVEL}")
 message(STATUS "Stable ABI - ${SKBUILD_SABI_VERSION}")
 
 # Helper to configure default CUDA setup.
-function(configure_cuda_global_flags)
+function(configure_global_cuda_flags)
   find_package(CUDAToolkit REQUIRED)
   if(NOT DEFINED CMAKE_CUDA_COMPILER)
     # Enabling CUDA language support requires nvcc available. Here, we use
@@ -75,6 +75,8 @@ function(configure_cuda_global_flags)
   if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
     set(CMAKE_CUDA_ARCHITECTURES all-major)
   endif()
+  # Enable CUDA language support.
+  enable_language(CUDA)
 endfunction()
 
 # Global build configuration when this project is the top-level project.
@@ -90,10 +92,9 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     add_link_options(-dead_strip)
   elseif(UNIX)
     if(${FAISS_ENABLE_GPU} AND NOT ${FAISS_ENABLE_ROCM})
-      configure_cuda_global_flags()
-    else()
-      add_compile_options(-fdata-sections -ffunction-sections)
+      configure_global_cuda_flags()
     endif()
+    add_compile_options(-fdata-sections -ffunction-sections)
     add_link_options(-Wl,--gc-sections)
   elseif(WIN32)
     # A few of warning suppressions for Windows.
