@@ -50,17 +50,36 @@ set(FAISS_ENABLE_PYTHON OFF) # We use our own Python build configuration.
 set(PYTHON_PACKAGE_NAME
     "faiss"
     CACHE STRING "Python package name, default to faiss")
+
+# SABI options.
 # TODO: Derive the hex value from SKBUILD_SABI_VERSION.
 set(PY_LIMITED_API
     "0x03090000"
     CACHE STRING "Py_LIMITED_API macro value")
-
-# Print out the SABI configuration.
 include(CMakeDependentOption)
 cmake_dependent_option(ENABLE_SABI "Enable stable ABI." ON
                        "SKBUILD_SABI_VERSION" OFF)
 message(STATUS "Optimization level - ${FAISS_OPT_LEVEL}")
 message(STATUS "Stable ABI - ${SKBUILD_SABI_VERSION}")
+
+# Helper to configure default CUDA setup.
+function(configure_cuda_global_flags)
+  find_package(CUDAToolkit REQUIRED)
+  if(NOT DEFINED CMAKE_CUDA_COMPILER)
+    # Enabling CUDA language support requires nvcc available. Here, we use
+    # FindCUDAToolkit to detect nvcc executable.
+    set(CMAKE_CUDA_COMPILER ${CUDAToolkit_NVCC_EXECUTABLE})
+  endif()
+  # Set default CUDA architecture to all-major.
+  if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+    set(CMAKE_CUDA_ARCHITECTURES all-major)
+  endif()
+  # Suppress deprecation warnings by default as the library targets many
+  # architectures.
+  if(NOT DEFINED CMAKE_CUDA_FLAGS)
+    set(CMAKE_CUDA_FLAGS -Wno-deprecated-gpu-targets)
+  endif()
+endfunction()
 
 # Global build configuration when this project is the top-level project.
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
@@ -76,28 +95,11 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   elseif(UNIX)
     add_compile_options(-fdata-sections -ffunction-sections)
     add_link_options(-Wl,--gc-sections)
-    if(${FAISS_ENABLE_GPU})
-      if(${FAISS_ENABLE_ROCM})
-
-      else()
-        find_package(CUDAToolkit REQUIRED)
-        if(NOT DEFINED CMAKE_CUDA_COMPILER)
-          # Enabling CUDA language support requires nvcc available. Here, we use
-          # FindCUDAToolkit to detect nvcc executable.
-          set(CMAKE_CUDA_COMPILER ${CUDAToolkit_NVCC_EXECUTABLE})
-        endif()
-        # Set default CUDA architecture to all-major.
-        if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-          set(CMAKE_CUDA_ARCHITECTURES all-major)
-        endif()
-        # Suppress deprecation warnings by default as the library targets many
-        # architectures.
-        if(NOT DEFINED CMAKE_CUDA_FLAGS)
-          set(CMAKE_CUDA_FLAGS -Wno-deprecated-gpu-targets)
-        endif()
-      endif()
+    if(${FAISS_ENABLE_GPU} AND NOT ${FAISS_ENABLE_ROCM})
+      configure_cuda_global_flags()
     endif()
   elseif(WIN32)
+    # A few of warning suppressions for Windows.
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
       add_compile_options(/wd4101 /wd4267 /wd4477)
       add_link_options(/ignore:4217)

@@ -23,8 +23,9 @@ include(${SWIG_USE_FILE})
 set(UseSWIG_TARGET_NAME_PREFERENCE STANDARD)
 set(SWIG_SOURCE_FILE_EXTENSIONS swig)
 
-# Helper to set up Stable ABI properties.
-function(configure_sabi_properties target)
+# Helper to set up Python properties.
+function(configure_python_properties target)
+  target_include_directories(${target} PRIVATE ${Python_NumPy_INCLUDE_DIRS})
   if(${ENABLE_SABI})
     target_compile_definitions(${target}
                                PRIVATE Py_LIMITED_API=${PY_LIMITED_API})
@@ -53,22 +54,25 @@ endfunction()
 
 # Helper to set up GPU-related properties.
 function(configure_gpu_properties target)
-  if(${FAISS_ENABLE_GPU})
-    target_compile_definitions(${target} PRIVATE FAISS_ENABLE_GPU)
-    set_property(TARGET ${target} APPEND PROPERTY SWIG_COMPILE_DEFINITIONS GPU_WRAPPER)
-    if(${FAISS_ENABLE_ROCM})
-      target_link_libraries(${target} PRIVATE hip::host)
-      set_property(TARGET ${target} APPEND PROPERTY
-                                           SWIG_COMPILE_DEFINITIONS
-                                           FAISS_ENABLE_ROCM)
-    else()
-      target_link_libraries(${target} PRIVATE CUDA::cudart CUDA::cublas)
-      if(${FAISS_ENABLE_CUVS})
-        target_link_libraries(${target} PRIVATE cuvs::cuvs)
-        set_property(TARGET ${target} APPEND PROPERTY
-                                            SWIG_COMPILE_DEFINITIONS
-                                            FAISS_ENABLE_CUVS)
-      endif()
+  target_compile_definitions(${target} PRIVATE FAISS_ENABLE_GPU)
+  set_property(
+    TARGET ${target}
+    APPEND
+    PROPERTY SWIG_COMPILE_DEFINITIONS GPU_WRAPPER)
+  if(${FAISS_ENABLE_ROCM})
+    target_link_libraries(${target} PRIVATE hip::host)
+    set_property(
+      TARGET ${target}
+      APPEND
+      PROPERTY SWIG_COMPILE_DEFINITIONS FAISS_ENABLE_ROCM)
+  else()
+    target_link_libraries(${target} PRIVATE CUDA::cudart CUDA::cublas)
+    if(${FAISS_ENABLE_CUVS})
+      target_link_libraries(${target} PRIVATE cuvs::cuvs)
+      set_property(
+        TARGET ${target}
+        APPEND
+        PROPERTY SWIG_COMPILE_DEFINITIONS FAISS_ENABLE_CUVS)
     endif()
   endif()
 endfunction()
@@ -104,12 +108,12 @@ function(configure_extension suffix)
   else()
     set_property(TARGET ${target} PROPERTY SWIG_COMPILE_DEFINITIONS
                                            SWIGWORDSIZE64)
-    configure_gpu_properties(${target})
+    if(${FAISS_ENABLE_GPU})
+      configure_gpu_properties(${target})
+    endif()
   endif()
 
-  # Set up Stable ABI properties.
-  configure_sabi_properties(${target})
-  target_include_directories(${target} PRIVATE ${Python_NumPy_INCLUDE_DIRS})
+  configure_python_properties(${target})
   target_link_libraries(${target} PRIVATE "faiss${suffix}" OpenMP::OpenMP_CXX
                                           faiss_python_callbacks)
 
@@ -134,10 +138,10 @@ function(configure_callback_lib)
     faiss_python_callbacks
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../third-party/faiss/)
   target_include_directories(faiss_python_callbacks
-                            PRIVATE ${Python_INCLUDE_DIRS})
+                             PRIVATE ${Python_INCLUDE_DIRS})
   if(${ENABLE_SABI})
     target_compile_definitions(faiss_python_callbacks
-                              PRIVATE Py_LIMITED_API=${PY_LIMITED_API})
+                               PRIVATE Py_LIMITED_API=${PY_LIMITED_API})
   endif()
 endfunction()
 
