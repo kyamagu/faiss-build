@@ -20,7 +20,8 @@ jobs:
         env:
           CIBW_BUILD: cp39-manylinux_x86_64
           CIBW_ENVIRONMENT: >
-            SKBUILD_CMAKE_DEFINE="FAISS_ENABLE_GPU=ON;CMAKE_CUDA_ARCHITECTURES=native"
+            SKBUILD_CMAKE_DEFINE="FAISS_ENABLE_GPU=ON"
+            SKBUILD_WHEEL_PY_API=cp39
             SKBUILD_BUILD_VERBOSE=true
             CMAKE_BUILD_TYPE=Release
           CIBW_BEFORE_ALL: bash scripts/before_Linux.sh

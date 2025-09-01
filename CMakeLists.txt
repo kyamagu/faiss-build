@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.18...4.0)
+cmake_minimum_required(VERSION 3.24...4.0)
 
 # Guard for standalone CMake build instead of scikit-build-core.
 if(NOT "${SKBUILD}" STREQUAL "2")
@@ -66,18 +66,19 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     if(${FAISS_ENABLE_GPU})
       if(${FAISS_ENABLE_ROCM})
       else()
-        # For some reason, FindCUDAToolkit fails to find nvcc without explicit PATH setup.
-        find_program(NVCC_FOUND nvcc)
-        if(NOT NVCC_FOUND)
-          set(CMAKE_CUDA_COMPILER /usr/local/cuda/bin/nvcc)
+        # Enabling CUDA language support requires nvcc available.
+        find_package(CUDAToolkit REQUIRED)
+        if(NOT DEFINED CMAKE_CUDA_COMPILER)
+          set(CMAKE_CUDA_COMPILER CUDAToolkit_NVCC_EXECUTABLE)
         endif()
         # Set default CUDA architecture to all-major.
         if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
           set(CMAKE_CUDA_ARCHITECTURES all-major)
+        endif()
+        # Suppress deprecation warnings by default as the library targets many architectures.
+        if(NOT DEFINED CMAKE_CUDA_FLAGS)
           set(CMAKE_CUDA_FLAGS -Wno-deprecated-gpu-targets)
         endif()
-        # Enable CUDA.
-        enable_language(CUDA)
       endif()
     endif()
   elseif(WIN32)
