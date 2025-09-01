@@ -75,9 +75,9 @@ function(configure_cuda_global_flags)
   if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
     set(CMAKE_CUDA_ARCHITECTURES all-major)
   endif()
-  if(NOT DEFINED CMAKE_CUDA_FLAGS)
-    set(CMAKE_CUDA_FLAGS -Wno-deprecated-gpu-targets)
-  endif()
+  # if(NOT DEFINED CMAKE_CUDA_FLAGS)
+  #   set(CMAKE_CUDA_FLAGS -Wno-deprecated-gpu-targets)
+  # endif()
 endfunction()
 
 # Global build configuration when this project is the top-level project.
