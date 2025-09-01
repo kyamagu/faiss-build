@@ -40,7 +40,6 @@ message(STATUS "Stable ABI - ${SKBUILD_SABI_VERSION}")
 function(configure_default_options)
   set(CMAKE_CXX_STANDARD 17)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
-  set(CMAKE_CXX_EXTENSIONS OFF)
 
   # Set up platform-specific global flags.
   if(APPLE)
@@ -75,6 +74,17 @@ function(configure_apple_platform)
       set(OpenMP_ROOT
           "${HOMEBREW_LIBOMP_PREFIX}"
           CACHE PATH "OpenMP root from Homebrew")
+    endif()
+  endif()
+  # Set MACOSX_DEPLOYMENT_TARGET.
+  if(NOT DEFINED ENV{MACOSX_DEPLOYMENT_TARGET})
+    execute_process(COMMAND sw_vers -productVersion
+                    OUTPUT_VARIABLE MACOSX_VERSION
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(${MACOSX_VERSION} VERSION_LESS "10.14")
+      set(ENV{MACOSX_DEPLOYMENT_TARGET} 10.13)
+    else()
+      set(ENV{MACOSX_DEPLOYMENT_TARGET} 10.14)
     endif()
   endif()
 endfunction()
