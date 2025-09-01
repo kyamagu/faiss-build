@@ -79,14 +79,16 @@ function(configure_apple_platform)
     endif()
   endif()
   # Set MACOSX_DEPLOYMENT_TARGET.
+  # NOTE: This is a workaround for the compatibility with libomp on Homebrew.
+  # For C++17 compatibility, the minimum required version is 10.13.
   if(NOT DEFINED ENV{MACOSX_DEPLOYMENT_TARGET})
     execute_process(COMMAND sw_vers -productVersion
                     OUTPUT_VARIABLE MACOSX_VERSION
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if(${MACOSX_VERSION} VERSION_LESS "10.14")
-      set(ENV{MACOSX_DEPLOYMENT_TARGET} 10.13)
+    if(${MACOSX_VERSION} VERSION_LESS "14.0")
+      set(ENV{MACOSX_DEPLOYMENT_TARGET} 13.0)
     else()
-      set(ENV{MACOSX_DEPLOYMENT_TARGET} 10.14)
+      set(ENV{MACOSX_DEPLOYMENT_TARGET} 14.0)
     endif()
   endif()
   message(STATUS "MACOSX_DEPLOYMENT_TARGET - $ENV{MACOSX_DEPLOYMENT_TARGET}")
