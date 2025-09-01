@@ -71,17 +71,15 @@ function(configure_cuda_global_flags)
     # FindCUDAToolkit to detect nvcc executable.
     set(CMAKE_CUDA_COMPILER ${CUDAToolkit_NVCC_EXECUTABLE})
   endif()
-  message(STATUS "CUDA compiler - ${CMAKE_CUDA_COMPILER}")
   # Set default CUDA architecture to all-major.
   if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
     set(CMAKE_CUDA_ARCHITECTURES all-major)
   endif()
-  # Suppress deprecation warnings by default as the library targets many
-  # architectures.
   if(NOT DEFINED CMAKE_CUDA_FLAGS)
     set(CMAKE_CUDA_FLAGS -Xcompiler=-ffunction-sections
                          -Xcompiler=-fdata-sections -Wno-deprecated-gpu-targets)
   endif()
+  enable_language(CUDA)
 endfunction()
 
 # Global build configuration when this project is the top-level project.
@@ -98,9 +96,8 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   elseif(UNIX)
     if(${FAISS_ENABLE_GPU} AND NOT ${FAISS_ENABLE_ROCM})
       configure_cuda_global_flags()
-    else()
-      add_compile_options(-fdata-sections -ffunction-sections)
     endif()
+    add_compile_options(-fdata-sections -ffunction-sections)
     add_link_options(-Wl,--gc-sections)
   elseif(WIN32)
     # A few of warning suppressions for Windows.
