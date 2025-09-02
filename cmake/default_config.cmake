@@ -41,7 +41,6 @@ function(configure_default_options)
   set(CMAKE_CXX_STANDARD 17 PARENT_SCOPE)
   set(CMAKE_CXX_STANDARD_REQUIRED ON PARENT_SCOPE)
   set(CMAKE_CXX_EXTENSIONS OFF PARENT_SCOPE)
-  message(STATUS "C++ standard - ${CMAKE_CXX_STANDARD}")
 
   # Set up platform-specific global flags.
   if(APPLE)

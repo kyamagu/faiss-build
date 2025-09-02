@@ -36,13 +36,10 @@ jobs:
         with:
           arch: ${{ matrix.os == 'windows-11-arm' && 'arm64' || 'x64' }}
         if: runner.os == 'Windows'
-      - name: Install system dependencies (Windows)
-        shell: pwsh
-        run: ./scripts/install_Windows.ps1
-        if: runner.os == 'Windows'
-      - name: Install system dependencies (macOS)
-        run: ./scripts/install_macOS.sh
-        if: runner.os == 'macOS'
+      # NOTE: Linux needs a setup from before-all hook, because they are inside containers.
+      - name: Install system dependencies (Windows and macOS)
+        run: ./scripts/install_${{ matrix.os }}.sh
+        if: runner.os == 'Windows' || runner.os == 'macOS'
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.1.4
         env:
