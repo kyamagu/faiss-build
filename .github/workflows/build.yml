@@ -38,7 +38,7 @@ jobs:
         if: runner.os == 'Windows'
       # NOTE: Linux needs a setup from before-all hook, because they are inside containers.
       - name: Install system dependencies (Windows and macOS)
-        run: ./scripts/install_${{ matrix.os }}.sh
+        run: ./scripts/install_${{ runner.os }}.sh
         if: runner.os == 'Windows' || runner.os == 'macOS'
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.1.4
