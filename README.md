@@ -32,12 +32,3 @@ uv build --wheel
 ```
 
 See also the list of supported build-time options in [the upstream documentation](https://github.com/facebookresearch/faiss/blob/main/INSTALL.md#step-1-invoking-cmake).
-
-
-## Troubleshooting
-
-macOS users might need to set `OpenMP_ROOT`.
-
-```bash
-export OpenMP_ROOT=$(brew --prefix)/opt/libomp
-```

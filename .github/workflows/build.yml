@@ -31,41 +31,30 @@ jobs:
         with:
           submodules: true
       # NOTE: You may skip this step for using the standard MSBuild setup, but necessary for ClangCL.
-      - name: Setup MSVC environment
+      - name: Setup MSVC environment (Windows)
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: ${{ matrix.os == 'windows-11-arm' && 'arm64' || 'x64' }}
         if: runner.os == 'Windows'
+      # NOTE: Linux needs a setup from before-all hook, because they are inside containers.
+      - name: Install system dependencies (Windows)
+        run: ./scripts/install_Windows.ps1
+        if: runner.os == 'Windows'
+      - name: Install system dependencies (macOS)
+        run: ./scripts/install_macOS.sh
+        if: runner.os == 'macOS'
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.1.4
         env:
-          # NOTE: CMAKE_BUILD_TYPE=Release removes debugging symbols.
-          # TODO: Isolate platform-specific environment setup in a separate step.
-          CIBW_ENVIRONMENT_LINUX: >
+          CIBW_ENVIRONMENT: >
             SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
-            SKBUILD_WHEEL_PY_API=cp39
-            CMAKE_BUILD_TYPE=Release
-          # NOTE: On Windows, setting SKBUILD_WHEEL_PY_API results in broken DLLs.
-          # NOTE: You may set CMAKE_GENERATOR_TOOLSET=ClangCL, but results in broken DLLs on ARM64.
-          CIBW_ENVIRONMENT_WINDOWS: >
-            SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
-            CMAKE_BUILD_TYPE=Release
-            PATH="${PATH};c:/Program Files/OpenBLAS/bin"
-            CPATH="${CPATH};c:/Program Files/OpenBLAS/include"
-            LIB="${LIB};c:/Program Files/OpenBLAS/lib"
-          CIBW_ENVIRONMENT_MACOS: >
-            SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
-            SKBUILD_WHEEL_PY_API=cp39
-            CMAKE_BUILD_TYPE=Release
-            MACOSX_DEPLOYMENT_TARGET=${{ matrix.os == 'macos-13' && '13.0' || '14.0' }}
-          CIBW_BEFORE_ALL: bash scripts/before_${{ runner.os }}.sh
       - uses: actions/upload-artifact@v4
         with:
           name: wheel-${{ matrix.os }}
           path: ./wheelhouse/*.whl
 
   build_cuda_wheels:
-    name: Build CUDA wheels on ubuntu-24.04
+    name: Build CUDA wheels
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -76,7 +65,5 @@ jobs:
         env:
           CIBW_BUILD: cp3*-manylinux_x86_64
           CIBW_ENVIRONMENT: >
+            SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=generic"
             FAISS_ENABLE_GPU=ON
-            SKBUILD_WHEEL_PY_API=cp39
-            CMAKE_BUILD_TYPE=Release
-          CIBW_BEFORE_ALL: bash scripts/before_Linux.sh

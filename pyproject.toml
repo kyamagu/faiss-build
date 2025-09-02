@@ -45,31 +45,27 @@ addopts = [
     "--deselect=third-party/faiss/tests/test_contrib.py::TestClustering::test_ivf_train_2level",
 ]
 
+[tool.scikit-build]
+cmake.build-type = "Release"
+# NOTE: You may set CMAKE_GENERATOR_TOOLSET=ClangCL on Windows, but results in broken DLLs on ARM64.
+
+[[tool.scikit-build.overrides]]
+if.platform-system = "^(darwin|linux)"  # NOTE: Windows ABI3 results in broken DLLs.
+if.abi-flags = "^$"  # NOTE: Free-threaded Python does not support stable ABI.
+wheel.py-api = "cp39"
+
 [tool.cibuildwheel]
 archs = "native"
-# cp39 and cp310 aren't supported on Windows ARM64
-# cp314t-win issue: https://gitlab.kitware.com/cmake/cmake/-/issues/26926
-# cp3*t does not have stable ABI and skip here
+# NOTE: We do not support cp39 and cp310 on Windows ARM64
+# NOTE: cp3*t-win issue: https://gitlab.kitware.com/cmake/cmake/-/issues/26926
+# NOTE: cp3*t does not support stable API and we skip them for now.
 skip = "cp39-win_arm64 cp310-win_arm64 cp3*t-*"
 test-requires = ["pytest", "scipy"]
 test-command = "pytest {project}/third-party/faiss/tests"
 
-[tool.cibuildwheel.linux]
-repair-wheel-command = [
-    "auditwheel show {wheel}",
-    "auditwheel repair -w {dest_dir} {wheel}",
-    "pipx run abi3audit --strict --report {wheel}"
-]
-
-[tool.cibuildwheel.macos]
-repair-wheel-command = [
-    "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}",
-    "pipx run abi3audit --strict --report {wheel}"
-]
-
-[tool.cibuildwheel.windows]
-repair-wheel-command = ["pipx run delvewheel repair -v -w {dest_dir} {wheel}"]
-# Disable scipy tests on Windows.
+[[tool.cibuildwheel.overrides]]
+# Skip scipy tests for platforms not supporting binary wheels.
+select = "cp39-musllinux_aarch64 *-win_arm64"
 test-requires = ["pytest"]
 test-command = """
 pytest {project}/third-party/faiss/tests/ \
@@ -77,3 +73,23 @@ pytest {project}/third-party/faiss/tests/ \
     --ignore={project}/third-party/faiss/tests/test_extra_distances.py \
     --ignore={project}/third-party/faiss/tests/test_residual_quantizer.py
 """
+
+[tool.cibuildwheel.linux]
+# NOTE: Linux needs a setup from before-all hook, because they are inside containers.
+before-all = "bash scripts/install_Linux.sh"
+# TODO: Skip abi3audit when wheel.py-api is not set.
+repair-wheel-command = [
+    "auditwheel show {wheel}",
+    "auditwheel repair -w {dest_dir} {wheel}",
+    "pipx run abi3audit --strict --report {wheel}"
+]
+
+[tool.cibuildwheel.macos]
+# TODO: Skip abi3audit when wheel.py-api is not set.
+repair-wheel-command = [
+    "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}",
+    "pipx run abi3audit --strict --report {wheel}"
+]
+
+[tool.cibuildwheel.windows]
+repair-wheel-command = ["pipx run delvewheel repair -v -w {dest_dir} {wheel}"]
