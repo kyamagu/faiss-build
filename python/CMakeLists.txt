@@ -1,6 +1,6 @@
 # Find requirements.
 find_package(SWIG REQUIRED COMPONENTS python)
-if(${ENABLE_SABI})
+if(ENABLE_SABI)
   find_package(Python REQUIRED COMPONENTS Interpreter Development.SABIModule
                                           NumPy)
 else()
@@ -9,7 +9,6 @@ endif()
 
 find_package(OpenMP REQUIRED)
 
-# Find GPU support.
 if(FAISS_ENABLE_CUDA)
   find_package(CUDAToolkit REQUIRED)
 elseif(FAISS_ENABLE_ROCM)
@@ -28,24 +27,24 @@ function(configure_python_properties target)
     target_compile_definitions(${target}
                                PRIVATE Py_LIMITED_API=${PY_LIMITED_API})
     target_link_libraries(${target} PRIVATE Python::SABIModule)
+    if(NOT SKBUILD_SOABI)
+      set(SKBUILD_SOABI "abi3")
+    endif()
     if(WIN32)
-      if(SKBUILD_SOABI STREQUAL "")
-        set(SKBUILD_SOABI "abi3")
-      endif()
-      set_target_properties(${target} PROPERTIES SUFFIX ".${SKBUILD_SOABI}.pyd")
+      set_target_properties(${target} PROPERTIES SUFFIX .${SKBUILD_SOABI}.pyd>)
     else()
       set_target_properties(
         ${target} PROPERTIES SUFFIX
-                             ".${SKBUILD_SOABI}${CMAKE_SHARED_MODULE_SUFFIX}")
+                             .${SKBUILD_SOABI}${CMAKE_SHARED_MODULE_SUFFIX})
     endif()
   else()
     # Standard build.
     target_link_libraries(${target} PRIVATE Python::Module)
     if(WIN32)
-      set_target_properties(${target} PROPERTIES SUFFIX ".pyd")
+      set_target_properties(${target} PROPERTIES SUFFIX .pyd)
     else()
-      set_target_properties(${target}
-                            PROPERTIES SUFFIX "${CMAKE_SHARED_MODULE_SUFFIX}")
+      set_target_properties(${target} PROPERTIES SUFFIX
+                                                 ${CMAKE_SHARED_MODULE_SUFFIX})
     endif()
   endif()
 endfunction()
@@ -58,19 +57,13 @@ function(configure_gpu_properties target)
     APPEND
     PROPERTY SWIG_COMPILE_DEFINITIONS GPU_WRAPPER)
   if(FAISS_ENABLE_CUDA)
-    target_link_libraries(
-      ${target}
-      PRIVATE
-        "$<IF:$<BOOL:${FAISS_GPU_STATIC}>,CUDA::cudart_static,CUDA::cudart>")
     if(FAISS_ENABLE_CUVS)
-      target_link_libraries(${target} PRIVATE cuvs::cuvs)
       set_property(
         TARGET ${target}
         APPEND
         PROPERTY SWIG_COMPILE_DEFINITIONS FAISS_ENABLE_CUVS)
     endif()
   elseif(FAISS_ENABLE_ROCM)
-    target_link_libraries(${target} PRIVATE hip::host)
     set_property(
       TARGET ${target}
       APPEND
@@ -115,7 +108,7 @@ function(configure_extension suffix)
   endif()
 
   configure_python_properties(${target})
-  target_link_libraries(${target} PRIVATE "faiss${suffix}" OpenMP::OpenMP_CXX
+  target_link_libraries(${target} PRIVATE "faiss${suffix}"
                                           faiss_python_callbacks)
 
   # Install the SWIG-generated files and the built shared library.
