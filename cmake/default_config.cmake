@@ -183,7 +183,7 @@ function(configure_cuda_flags)
   endif()
   if(NOT DEFINED ENV{CUDAFLAGS})
     set(ENV{CUDAFLAGS}
-        "-Wno-deprecated-gpu-targets -XCompiler=-fdata-sections,-ffunction-sections"
+        "-Wno-deprecated-gpu-targets -Xcompiler=-fdata-sections,-ffunction-sections"
     )
   endif()
   # Enable CUDA language support.
