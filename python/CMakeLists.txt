@@ -6,6 +6,11 @@ if(ENABLE_SABI)
 else()
   find_package(Python REQUIRED COMPONENTS Interpreter Development.Module NumPy)
 endif()
+if(ENABLE_CUDA)
+  find_package(CUDAToolkit REQUIRED)
+elseif(ENABLE_ROCM)
+  find_package(hip REQUIRED)
+endif()
 
 # Swig configurations.
 include(${SWIG_USE_FILE})
@@ -49,6 +54,7 @@ function(configure_gpu_properties target)
     APPEND
     PROPERTY SWIG_COMPILE_DEFINITIONS GPU_WRAPPER)
   if(FAISS_ENABLE_CUDA)
+    target_link_libraries(${target} PRIVATE ${CUDA_LIBS})
     if(FAISS_ENABLE_CUVS)
       set_property(
         TARGET ${target}
@@ -56,6 +62,7 @@ function(configure_gpu_properties target)
         PROPERTY SWIG_COMPILE_DEFINITIONS FAISS_ENABLE_CUVS)
     endif()
   elseif(FAISS_ENABLE_ROCM)
+    target_link_libraries(${target} PRIVATE hip::host)
     set_property(
       TARGET ${target}
       APPEND
