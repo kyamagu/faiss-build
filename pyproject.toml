@@ -49,6 +49,17 @@ addopts = [
 cmake.build-type = "Release"
 # NOTE: You may set CMAKE_GENERATOR_TOOLSET=ClangCL on Windows, but results in broken DLLs on ARM64.
 
+sdist.exclude = [
+    ".github",
+    "scripts",
+    "third-party/faiss/benchs",
+    "third-party/faiss/c_api",
+    "third-party/faiss/conda",
+    "third-party/faiss/demos",
+    "third-party/faiss/*tests",
+    "third-party/faiss/tutorial"
+]
+
 [[tool.scikit-build.overrides]]
 if.platform-system = "^(darwin|linux)"  # NOTE: Windows ABI3 results in broken DLLs.
 if.abi-flags = "^$"  # NOTE: Free-threaded Python does not support stable ABI.
