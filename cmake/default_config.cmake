@@ -162,7 +162,7 @@ endfunction()
 
 # Helper to configure Linux platform
 function(configure_linux_platform)
-  if(FAISS_CUDA)
+  if(FAISS_ENABLE_CUDA)
     configure_cuda_flags()
   endif()
   # TODO: Disable the following for CUDA objects.
@@ -178,7 +178,6 @@ function(configure_cuda_flags)
     # FindCUDAToolkit to detect nvcc executable.
     set(ENV{CUDACXX} CUDAToolkit_NVCC_EXECUTABLE)
   endif()
-  message(STATUS "CUDACXX - $ENV{CUDACXX}")
   # Set default CUDA architecture to all-major.
   if(NOT DEFINED ENV{CUDAARCHS})
     set(ENV{CUDAARCHS} all-major)
