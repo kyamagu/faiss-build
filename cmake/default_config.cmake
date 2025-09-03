@@ -59,6 +59,9 @@ message(STATUS "Faiss GPU support - ${FAISS_GPU_SUPPORT}")
 # LTO option.
 option(FAISS_USE_LTO "Enable Link Time Optimization (LTO)." ON)
 
+# CUDA static link option.
+option(FAISS_GPU_STATIC "Enable static linking of CUDA libraries." OFF)
+
 # Python package name.
 set(PYTHON_PACKAGE_NAME
     "faiss"
@@ -74,12 +77,13 @@ set(PY_LIMITED_API
 set(FAISS_ENABLE_EXTRAS OFF)
 set(BUILD_TESTING OFF)
 set(FAISS_ENABLE_PYTHON OFF) # We use our own Python build configuration.
-if(SKBUILD_SABI_VERSION STREQUAL "")
-  set(ENABLE_SABI OFF)
-  message(STATUS "Stable ABI - OFF")
-else()
+
+if(SKBUILD_SABI_VERSION)
   set(ENABLE_SABI ON)
   message(STATUS "Stable ABI - ${SKBUILD_SABI_VERSION}")
+else()
+  set(ENABLE_SABI OFF)
+  message(STATUS "Stable ABI - OFF")
 endif()
 
 # Helper to define default build options.
@@ -165,7 +169,8 @@ function(configure_linux_platform)
   if(FAISS_ENABLE_CUDA)
     configure_cuda_flags()
   endif()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdata-sections -ffunction-sections")
+  # NVCC has '-forward-unknown-to-host-compiler' option set by default.
+  add_compile_options(-fdata-sections -ffunction-sections)
   add_link_options(-Wl,--gc-sections)
 endfunction()
 
@@ -180,11 +185,6 @@ function(configure_cuda_flags)
   # Set default CUDA architecture to all-major.
   if(NOT DEFINED ENV{CUDAARCHS})
     set(ENV{CUDAARCHS} all-major)
-  endif()
-  if(NOT DEFINED ENV{CUDAFLAGS})
-    set(ENV{CUDAFLAGS}
-        "-Wno-deprecated-gpu-targets -Xcompiler=-fdata-sections,-ffunction-sections"
-    )
   endif()
   # Enable CUDA language support.
   enable_language(CUDA)

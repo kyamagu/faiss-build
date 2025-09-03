@@ -62,7 +62,7 @@ function(configure_gpu_properties target)
     target_link_libraries(
       ${target}
       PRIVATE
-        "$<IF:$<BOOL:${FAISS_GPU_STATIC}>,CUDA::cudart,CUDA::cudart_static>")
+        "$<IF:$<BOOL:${FAISS_GPU_STATIC}>,CUDA::cudart_static,CUDA::cudart>")
     if(FAISS_ENABLE_CUVS)
       target_link_libraries(${target} PRIVATE cuvs::cuvs)
       set_property(
