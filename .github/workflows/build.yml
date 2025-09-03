@@ -11,6 +11,8 @@ jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    # Temporarily disable
+    if: false
     strategy:
       matrix:
         include:
