@@ -176,7 +176,7 @@ function(configure_cuda_flags)
   if(NOT DEFINED ENV{CUDACXX})
     # Enabling CUDA language support requires nvcc available. Here, we use
     # FindCUDAToolkit to detect nvcc executable.
-    set(ENV{CUDACXX} CUDAToolkit_NVCC_EXECUTABLE)
+    set(ENV{CUDACXX} ${CUDAToolkit_NVCC_EXECUTABLE})
   endif()
   # Set default CUDA architecture to all-major.
   if(NOT DEFINED ENV{CUDAARCHS})
