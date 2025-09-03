@@ -65,7 +65,7 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.1.4
         env:
-          CIBW_BUILD: cp3*-manylinux_x86_64
+          CIBW_BUILD: cp311-manylinux_x86_64
           CIBW_ENVIRONMENT: >
             SKBUILD_BUILD_VERBOSE=true
             FAISS_OPT_LEVELS=avx2

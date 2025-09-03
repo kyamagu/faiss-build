@@ -165,8 +165,7 @@ function(configure_linux_platform)
   if(FAISS_ENABLE_CUDA)
     configure_cuda_flags()
   endif()
-  # TODO: Disable the following for CUDA objects.
-  add_compile_options(-fdata-sections -ffunction-sections)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdata-sections -ffunction-sections")
   add_link_options(-Wl,--gc-sections)
 endfunction()
 
@@ -183,7 +182,9 @@ function(configure_cuda_flags)
     set(ENV{CUDAARCHS} all-major)
   endif()
   if(NOT DEFINED ENV{CUDAFLAGS})
-    set(ENV{CUDAFLAGS} -Wno-deprecated-gpu-targets)
+    set(ENV{CUDAFLAGS}
+        "-Wno-deprecated-gpu-targets -XCompiler=-fdata-sections,-ffunction-sections"
+    )
   endif()
   # Enable CUDA language support.
   enable_language(CUDA)

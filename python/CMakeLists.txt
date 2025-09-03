@@ -12,12 +12,9 @@ find_package(OpenMP REQUIRED)
 # Find GPU support.
 if(FAISS_ENABLE_CUDA)
   find_package(CUDAToolkit REQUIRED)
-  # TODO: Better approach to rewrite existing compiler flags.
-  target_compile_options(
-    faiss_gpu_objs
-    PRIVATE
-      $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-ffunction-sections,-fdata-sections>
-  )
+  # # TODO: Better approach to rewrite existing compiler flags.
+  # target_compile_options( faiss_gpu_objs PRIVATE
+  # $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-ffunction-sections,-fdata-sections> )
 elseif(FAISS_ENABLE_ROCM)
   find_package(hip REQUIRED)
 endif()
@@ -62,7 +59,10 @@ function(configure_gpu_properties target)
     APPEND
     PROPERTY SWIG_COMPILE_DEFINITIONS GPU_WRAPPER)
   if(FAISS_ENABLE_CUDA)
-    target_link_libraries(${target} PRIVATE CUDA::cudart)
+    target_link_libraries(
+      ${target}
+      PRIVATE
+        "$<IF:$<BOOL:${FAISS_GPU_STATIC}>,CUDA::cudart,CUDA::cudart_static>")
     if(FAISS_ENABLE_CUVS)
       target_link_libraries(${target} PRIVATE cuvs::cuvs)
       set_property(
