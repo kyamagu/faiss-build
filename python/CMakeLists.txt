@@ -12,9 +12,6 @@ find_package(OpenMP REQUIRED)
 # Find GPU support.
 if(FAISS_ENABLE_CUDA)
   find_package(CUDAToolkit REQUIRED)
-  # # TODO: Better approach to rewrite existing compiler flags.
-  # target_compile_options( faiss_gpu_objs PRIVATE
-  # $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-ffunction-sections,-fdata-sections> )
 elseif(FAISS_ENABLE_ROCM)
   find_package(hip REQUIRED)
 endif()
@@ -26,7 +23,8 @@ set(SWIG_SOURCE_FILE_EXTENSIONS swig)
 # Helper to set up Python properties.
 function(configure_python_properties target)
   target_include_directories(${target} PRIVATE ${Python_NumPy_INCLUDE_DIRS})
-  if(${ENABLE_SABI})
+  if(ENABLE_SABI)
+    # Stable / Limited API build.
     target_compile_definitions(${target}
                                PRIVATE Py_LIMITED_API=${PY_LIMITED_API})
     target_link_libraries(${target} PRIVATE Python::SABIModule)
@@ -41,6 +39,7 @@ function(configure_python_properties target)
                              ".${SKBUILD_SOABI}${CMAKE_SHARED_MODULE_SUFFIX}")
     endif()
   else()
+    # Standard build.
     target_link_libraries(${target} PRIVATE Python::Module)
     if(WIN32)
       set_target_properties(${target} PROPERTIES SUFFIX ".pyd")
@@ -141,7 +140,7 @@ function(configure_callback_lib)
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../third-party/faiss/)
   target_include_directories(faiss_python_callbacks
                              PRIVATE ${Python_INCLUDE_DIRS})
-  if(${ENABLE_SABI})
+  if(ENABLE_SABI)
     target_compile_definitions(faiss_python_callbacks
                                PRIVATE Py_LIMITED_API=${PY_LIMITED_API})
   endif()
