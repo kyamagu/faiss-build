@@ -10,23 +10,20 @@ endif()
 find_package(OpenMP REQUIRED)
 
 # Find GPU support.
-if(${FAISS_ENABLE_GPU})
-  if(${FAISS_ENABLE_ROCM})
-    find_package(hip REQUIRED)
-  else()
-    find_package(CUDAToolkit REQUIRED)
-    # TODO: Better approach to rewrite compiler flags.
-    target_compile_options(
-      faiss_gpu_objs
-      PRIVATE
-        $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-ffunction-sections,-fdata-sections>
-    )
-  endif()
+if(FAISS_ENABLE_CUDA)
+  find_package(CUDAToolkit REQUIRED)
+  # TODO: Better approach to rewrite existing compiler flags.
+  target_compile_options(
+    faiss_gpu_objs
+    PRIVATE
+      $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-ffunction-sections,-fdata-sections>
+  )
+elseif(FAISS_ENABLE_ROCM)
+  find_package(hip REQUIRED)
 endif()
 
-# Find SWIG and set up the build configuration.
+# Swig configurations.
 include(${SWIG_USE_FILE})
-set(UseSWIG_TARGET_NAME_PREFERENCE STANDARD)
 set(SWIG_SOURCE_FILE_EXTENSIONS swig)
 
 # Helper to set up Python properties.
@@ -37,7 +34,7 @@ function(configure_python_properties target)
                                PRIVATE Py_LIMITED_API=${PY_LIMITED_API})
     target_link_libraries(${target} PRIVATE Python::SABIModule)
     if(WIN32)
-      if("${SKBUILD_SOABI}" STREQUAL "")
+      if(SKBUILD_SOABI STREQUAL "")
         set(SKBUILD_SOABI "abi3")
       endif()
       set_target_properties(${target} PROPERTIES SUFFIX ".${SKBUILD_SOABI}.pyd")
@@ -64,21 +61,21 @@ function(configure_gpu_properties target)
     TARGET ${target}
     APPEND
     PROPERTY SWIG_COMPILE_DEFINITIONS GPU_WRAPPER)
-  if(${FAISS_ENABLE_ROCM})
-    target_link_libraries(${target} PRIVATE hip::host)
-    set_property(
-      TARGET ${target}
-      APPEND
-      PROPERTY SWIG_COMPILE_DEFINITIONS FAISS_ENABLE_ROCM)
-  else()
-    target_link_libraries(${target} PRIVATE CUDA::cudart CUDA::cublas)
-    if(${FAISS_ENABLE_CUVS})
+  if(FAISS_ENABLE_CUDA)
+    target_link_libraries(${target} PRIVATE CUDA::cudart)
+    if(FAISS_ENABLE_CUVS)
       target_link_libraries(${target} PRIVATE cuvs::cuvs)
       set_property(
         TARGET ${target}
         APPEND
         PROPERTY SWIG_COMPILE_DEFINITIONS FAISS_ENABLE_CUVS)
     endif()
+  elseif(FAISS_ENABLE_ROCM)
+    target_link_libraries(${target} PRIVATE hip::host)
+    set_property(
+      TARGET ${target}
+      APPEND
+      PROPERTY SWIG_COMPILE_DEFINITIONS FAISS_ENABLE_ROCM)
   endif()
 endfunction()
 
@@ -113,7 +110,7 @@ function(configure_extension suffix)
   else()
     set_property(TARGET ${target} PROPERTY SWIG_COMPILE_DEFINITIONS
                                            SWIGWORDSIZE64)
-    if(${FAISS_ENABLE_GPU})
+    if(FAISS_ENABLE_GPU)
       configure_gpu_properties(${target})
     endif()
   endif()
@@ -152,17 +149,19 @@ endfunction()
 
 # Build extensions based on the optimization level.
 configure_callback_lib()
-configure_extension("")
-if(FAISS_OPT_LEVEL MATCHES "^(avx2|avx512|avx512_spr)$")
+if("generic" IN_LIST FAISS_OPT_LEVELS)
+  configure_extension("")
+endif()
+if("avx2" IN_LIST FAISS_OPT_LEVELS)
   configure_extension(_avx2)
 endif()
-if(FAISS_OPT_LEVEL MATCHES "^(avx512|avx512_spr)$")
+if("avx512" IN_LIST FAISS_OPT_LEVELS)
   configure_extension(_avx512)
 endif()
-if(FAISS_OPT_LEVEL STREQUAL "avx512_spr")
+if("avx512_spr" IN_LIST FAISS_OPT_LEVELS)
   configure_extension(_avx512_spr)
 endif()
-if(FAISS_OPT_LEVEL STREQUAL "sve")
+if("sve" IN_LIST FAISS_OPT_LEVELS)
   configure_extension(_sve)
 endif()
 

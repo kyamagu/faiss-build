@@ -15,15 +15,15 @@ jobs:
       matrix:
         include:
           - os: ubuntu-24.04
-            opt_level: avx512
+            opt_level: generic;avx2;avx512
           - os: ubuntu-24.04-arm
-            opt_level: sve
+            opt_level: generic;sve
           - os: macos-13
-            opt_level: avx2
+            opt_level: generic;avx2
           - os: macos-14
             opt_level: generic
           - os: windows-2022
-            opt_level: avx2
+            opt_level: generic;avx2
           - os: windows-11-arm
             opt_level: generic
     steps:
@@ -47,7 +47,7 @@ jobs:
         uses: pypa/cibuildwheel@v3.1.4
         env:
           CIBW_ENVIRONMENT: >
-            SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=${{ matrix.opt_level }}"
+            FAISS_OPT_LEVELS="${{ matrix.opt_level }}"
       - uses: actions/upload-artifact@v4
         with:
           name: wheel-${{ matrix.os }}
@@ -65,5 +65,7 @@ jobs:
         env:
           CIBW_BUILD: cp3*-manylinux_x86_64
           CIBW_ENVIRONMENT: >
-            SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=generic"
-            FAISS_ENABLE_GPU=ON
+            SKBUILD_BUILD_VERBOSE=true
+            FAISS_OPT_LEVELS=avx2
+            FAISS_GPU_SUPPORT=CUDA
+            FAISS_GPU_STATIC=ON

@@ -7,12 +7,14 @@ This is an experimental repository for building [faiss](https://github.com/faceb
 Clone the github repository with submodules first. Any build backend supporting `scikit-build-core` can build wheels.
 
 ```bash
-uv build --wheel
+pipx run build --wheel
 ```
 
 ```bash
-pipx run build --wheel
+uv build --wheel
 ```
+
+### Customizing build options
 
 You may pass cmake options via command line or environment variable `SKBUILD_CMAKE_DEFINE`. See [the scikit-build-core documentation](https://scikit-build-core.readthedocs.io/en/latest/configuration/index.html#configuring-cmake-arguments-and-defines) for details on how to specify CMake defines.
 
@@ -20,15 +22,21 @@ Command-line arguments:
 
 ```bash
 uv build --wheel \
-    -Ccmake.define.FAISS_OPT_LEVEL=avx2 \
-    -Ccmake.define.FAISS_ENABLE_GPU=ON
+    -Ccmake.define.FAISS_OPT_LEVELS="avx2;avx512" \
+    -Ccmake.define.FAISS_GPU_SUPPORT="CUDA;CUVS"
 ```
 
 Environment variable:
 
 ```bash
-export SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL=avx2;FAISS_ENABLE_GPU=ON"
+export SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL='avx2;avx512';FAISS_GPU_SUPPORT='CUDA;CUVS'"
 uv build --wheel
 ```
 
-See also the list of supported build-time options in [the upstream documentation](https://github.com/facebookresearch/faiss/blob/main/INSTALL.md#step-1-invoking-cmake).
+The following options are available for configuration.
+
+- `FAISS_OPT_LEVELS`: Optimization levels. You may set a semicolon-separated list of values from `<generic|avx2|avx512|avx512_spr|sve>`. For example, setting `generic;avx512` will include both `generic` and `avx512` binary extensions in the resulting wheel. This option offers more flexibility than the upstream config variable `FAISS_OPT_LEVEL` which cannot specify combinations.
+- `FAISS_GPU_SUPPORT`: GPU support. You may set a value from `<OFF|CUDA|CUVS|ROCM>`. For example, setting `CUDA` will enable CUDA support.
+- `FAISS_USE_LTO`: Enable link time optimization. Default is `ON`. Set `FAISS_USE_LTO=OFF` to disable.
+
+See also the list of supported build-time options in [the upstream documentation](https://github.com/facebookresearch/faiss/blob/main/INSTALL.md#step-1-invoking-cmake). Do not directly set `FAISS_OPT_LEVEL` and `FAISS_ENABLE_GPU` when building a wheel via this project, as that will confuse the build process.
