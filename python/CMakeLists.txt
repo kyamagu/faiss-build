@@ -54,7 +54,8 @@ function(configure_gpu_properties target)
     APPEND
     PROPERTY SWIG_COMPILE_DEFINITIONS GPU_WRAPPER)
   if(FAISS_ENABLE_CUDA)
-    target_link_libraries(${target} PRIVATE ${CUDA_LIBS})
+    target_include_directories(${target} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
+    # target_link_libraries(${target} PRIVATE ${CUDA_LIBS})
     if(FAISS_ENABLE_CUVS)
       set_property(
         TARGET ${target}
