@@ -78,6 +78,7 @@ EOF
 /opt/rh/gcc-toolset-14/root/usr/lib64
 /opt/rh/gcc-toolset-14/root/usr/lib/gcc/x86_64-redhat-linux/14
 EOF
+        ldconfig
     elif command -v apt &> /dev/null; then
         local DISTRO=${DISTRO:-noble}
         wget https://repo.radeon.com/rocm/rocm.gpg.key -O - \
