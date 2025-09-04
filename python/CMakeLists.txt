@@ -7,6 +7,9 @@ else()
   find_package(Python REQUIRED COMPONENTS Interpreter Development.Module NumPy)
 endif()
 find_package(OpenMP REQUIRED)
+if(FAISS_ENABLE_ROCM)
+  find_package(hip REQUIRED)
+endif()
 
 # Swig configurations.
 include(${SWIG_USE_FILE})
@@ -58,7 +61,7 @@ function(configure_gpu_properties target)
         PROPERTY SWIG_COMPILE_DEFINITIONS FAISS_ENABLE_CUVS)
     endif()
   elseif(FAISS_ENABLE_ROCM)
-    # target_link_libraries(${target} PRIVATE hip::host)
+    target_link_libraries(${target} PRIVATE hip::host)
     set_property(
       TARGET ${target}
       APPEND
