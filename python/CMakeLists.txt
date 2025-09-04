@@ -28,7 +28,7 @@ function(configure_python_properties target)
       set(SKBUILD_SOABI "abi3")
     endif()
     if(WIN32)
-      set_target_properties(${target} PROPERTIES SUFFIX .${SKBUILD_SOABI}.pyd>)
+      set_target_properties(${target} PROPERTIES SUFFIX .${SKBUILD_SOABI}.pyd)
     else()
       set_target_properties(
         ${target} PROPERTIES SUFFIX
