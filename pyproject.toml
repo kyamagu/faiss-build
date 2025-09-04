@@ -43,8 +43,10 @@ addopts = [
     "--deselect=third-party/faiss/tests/test_local_search_quantizer.py::TestComponents::test_update_codebooks_with_double",
     "--deselect=third-party/faiss/tests/test_contrib.py::TestPreassigned::test_float",
     "--deselect=third-party/faiss/tests/test_contrib.py::TestClustering::test_ivf_train_2level",
-    # The following occasionally fail, perhaps due to threading issues.
-    "--deselect=third-party/faiss/tests/test_binary_io.py::test_binary_from_float",
+    # Tests randomly segfault on musllinux, perhaps due to multiprocessing threading issues.
+    # Below are tests that have been observed to segfault on musllinux.
+    # "--deselect=third-party/faiss/tests/test_binary_io.py::test_binary_from_float",
+    # "--deselect=third-party/faiss/tests/test_graph_based.py::test_io_no_storage"
 ]
 
 [tool.scikit-build]
