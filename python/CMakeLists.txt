@@ -58,7 +58,7 @@ function(configure_gpu_properties target)
         PROPERTY SWIG_COMPILE_DEFINITIONS FAISS_ENABLE_CUVS)
     endif()
   elseif(FAISS_ENABLE_ROCM)
-    target_link_libraries(${target} PRIVATE hip::host)
+    # target_link_libraries(${target} PRIVATE hip::host)
     set_property(
       TARGET ${target}
       APPEND
