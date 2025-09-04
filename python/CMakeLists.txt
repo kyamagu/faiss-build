@@ -6,6 +6,7 @@ if(FAISS_ENABLE_SABI)
 else()
   find_package(Python REQUIRED COMPONENTS Interpreter Development.Module NumPy)
 endif()
+find_package(OpenMP)
 
 # Swig configurations.
 include(${SWIG_USE_FILE})
@@ -102,8 +103,9 @@ function(configure_extension suffix)
   endif()
 
   configure_python_properties(${target})
-  target_link_libraries(${target} PRIVATE "faiss${suffix}"
-                                          faiss_python_callbacks)
+  target_link_libraries(
+    ${target} PRIVATE "faiss${suffix}" faiss_python_callbacks Python::NumPy
+                      OpenMP::OpenMP_CXX)
 
   # Install the SWIG-generated files and the built shared library.
   get_property(
