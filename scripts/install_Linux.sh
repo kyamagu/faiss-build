@@ -83,6 +83,11 @@ EOF
             | tee /etc/apt/preferences.d/rocm-pin-600
         apt update
         apt install -y rocm-hip-runtime-devel
+        tee /etc/ld.so.conf.d/99-gcc-toolset-14.conf <<EOF
+/opt/rh/gcc-toolset-14/root/usr/lib64
+/opt/rh/gcc-toolset-14/root/usr/lib/gcc/x86_64-redhat-linux/14
+EOF
+        ldconfig
     else
         echo "Unsupported package manager. Please install ROCm manually."
     fi
