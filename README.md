@@ -21,21 +21,21 @@ You may pass cmake options via command line or environment variable `SKBUILD_CMA
 Command-line arguments:
 
 ```bash
-uv build --wheel \
-    -Ccmake.define.FAISS_OPT_LEVELS="avx2;avx512" \
-    -Ccmake.define.FAISS_GPU_SUPPORT="CUDA;CUVS"
+pipx run build --wheel \
+    -Ccmake.define.FAISS_OPT_LEVELS=avx2,avx512 \
+    -Ccmake.define.FAISS_GPU_SUPPORT=CUDA
 ```
 
 Environment variable:
 
 ```bash
-export SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVEL='avx2;avx512';FAISS_GPU_SUPPORT='CUDA;CUVS'"
-uv build --wheel
+export SKBUILD_CMAKE_DEFINE="FAISS_OPT_LEVELS=avx2,avx512;FAISS_GPU_SUPPORT=CUDA"
+pipx run build --wheel
 ```
 
 The following options are available for configuration.
 
-- `FAISS_OPT_LEVELS`: Optimization levels. You may set a semicolon-separated list of values from `<generic|avx2|avx512|avx512_spr|sve>`. For example, setting `generic;avx512` will include both `generic` and `avx512` binary extensions in the resulting wheel. This option offers more flexibility than the upstream config variable `FAISS_OPT_LEVEL` which cannot specify combinations.
+- `FAISS_OPT_LEVELS`: Optimization levels. You may set a semicolon-separated list of values from `<generic|avx2|avx512|avx512_spr|sve>`. For example, setting `generic,avx2` will include both `generic` and `avx2` binary extensions in the resulting wheel. This option offers more flexibility than the upstream config variable `FAISS_OPT_LEVEL` which cannot specify arbitrary combinations.
 - `FAISS_GPU_SUPPORT`: GPU support. You may set a value from `<OFF|CUDA|CUVS|ROCM>`. For example, setting `CUDA` will enable CUDA support.
 - `FAISS_USE_LTO`: Enable link time optimization. Default is `ON`. Set `FAISS_USE_LTO=OFF` to disable.
 

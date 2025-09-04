@@ -1,17 +1,19 @@
 # Top-level default configuration for faiss-build
 
-# Optimization levels; e.g., "generic;avx2"
+# Optimization levels; e.g., "generic,avx2"
 set(FAISS_OPT_LEVELS
     "generic"
     CACHE
       STRING
-      "Optimization level, semicolon-separated string of <generic|avx2|avx512|avx512_spr|sve>."
+      "Optimization level, comma-separated string of <generic|avx2|avx512|avx512_spr|sve>."
 )
 if(DEFINED ENV{FAISS_OPT_LEVELS})
   set(FAISS_OPT_LEVELS
       $ENV{FAISS_OPT_LEVELS}
       CACHE STRING "Optimization level." FORCE)
 endif()
+string(REPLACE "," ";" FAISS_OPT_LEVELS "${FAISS_OPT_LEVELS}")
+list(TRANSFORM FAISS_OPT_LEVELS STRIP)
 set(FAISS_OPT_LEVELS_VALUES "generic;avx2;avx512;avx512_spr;sve")
 foreach(level IN LISTS FAISS_OPT_LEVELS)
   if(NOT level IN_LIST FAISS_OPT_LEVELS_VALUES)
