@@ -84,3 +84,4 @@ jobs:
             FAISS_GPU_SUPPORT=ROCM
             SKBUILD_BUILD_VERBOSE=true
             SKBUILD_CMAKE_DEFINE="CMAKE_HIP_ARCHITECTURES=gfx906"
+            LDFLAGS="-L/opt/rh/gcc-toolset-14/root/usr/lib/gcc/x86_64-redhat-linux/14"
