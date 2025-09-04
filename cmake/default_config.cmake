@@ -79,10 +79,10 @@ set(BUILD_TESTING OFF)
 set(FAISS_ENABLE_PYTHON OFF) # We use our own Python build configuration.
 
 if(SKBUILD_SABI_VERSION)
-  set(ENABLE_SABI ON)
+  set(FAISS_ENABLE_SABI ON)
   message(STATUS "Stable ABI - ${SKBUILD_SABI_VERSION}")
 else()
-  set(ENABLE_SABI OFF)
+  set(FAISS_ENABLE_SABI OFF)
   message(STATUS "Stable ABI - OFF")
 endif()
 

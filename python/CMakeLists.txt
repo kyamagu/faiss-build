@@ -1,14 +1,14 @@
 # Find requirements.
 find_package(SWIG REQUIRED COMPONENTS python)
-if(ENABLE_SABI)
+if(FAISS_ENABLE_SABI)
   find_package(Python REQUIRED COMPONENTS Interpreter Development.SABIModule
                                           NumPy)
 else()
   find_package(Python REQUIRED COMPONENTS Interpreter Development.Module NumPy)
 endif()
-if(ENABLE_CUDA)
+if(FAISS_ENABLE_GPU)
   find_package(CUDAToolkit REQUIRED)
-elseif(ENABLE_ROCM)
+elseif(FAISS_ENABLE_ROCM)
   find_package(hip REQUIRED)
 endif()
 
@@ -19,7 +19,7 @@ set(SWIG_SOURCE_FILE_EXTENSIONS swig)
 # Helper to set up Python properties.
 function(configure_python_properties target)
   target_include_directories(${target} PRIVATE ${Python_NumPy_INCLUDE_DIRS})
-  if(ENABLE_SABI)
+  if(FAISS_ENABLE_SABI)
     # Stable / Limited API build.
     target_compile_definitions(${target}
                                PRIVATE Py_LIMITED_API=${PY_LIMITED_API})
@@ -133,7 +133,7 @@ function(configure_callback_lib)
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../third-party/faiss/)
   target_include_directories(faiss_python_callbacks
                              PRIVATE ${Python_INCLUDE_DIRS})
-  if(ENABLE_SABI)
+  if(FAISS_ENABLE_SABI)
     target_compile_definitions(faiss_python_callbacks
                                PRIVATE Py_LIMITED_API=${PY_LIMITED_API})
   endif()
