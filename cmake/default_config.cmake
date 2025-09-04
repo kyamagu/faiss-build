@@ -87,16 +87,16 @@ else()
 endif()
 
 # Helper to define default build options.
-function(configure_default_options)
+macro(configure_default_options)
   set(CMAKE_CXX_STANDARD
       17
-      PARENT_SCOPE)
+     )
   set(CMAKE_CXX_STANDARD_REQUIRED
       ON
-      PARENT_SCOPE)
+     )
   set(CMAKE_CXX_EXTENSIONS
       OFF
-      PARENT_SCOPE)
+     )
 
   # Set up platform-specific global flags.
   if(APPLE)
@@ -118,10 +118,10 @@ function(configure_default_options)
     message(STATUS "ccache enabled")
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
   endif()
-endfunction()
+endmacro()
 
 # Helper to configure Apple platform
-function(configure_apple_platform)
+macro(configure_apple_platform)
   add_compile_options(-Wno-unused-function -Wno-format
                       -Wno-deprecated-declarations)
   add_link_options(-dead_strip)
@@ -141,22 +141,22 @@ function(configure_apple_platform)
   # Set MACOSX_DEPLOYMENT_TARGET. NOTE: This is a workaround for the
   # compatibility with libomp on Homebrew. For C++17 compatibility, the minimum
   # required version is 10.13.
-  if(NOT DEFINED ENV{MACOSX_DEPLOYMENT_TARGET})
+  if(NOT DEFINED CMAKE_OSX_DEPLOYMENT_TARGET)
     execute_process(
       COMMAND sw_vers -productVersion
       OUTPUT_VARIABLE MACOSX_VERSION
       OUTPUT_STRIP_TRAILING_WHITESPACE)
     if(${MACOSX_VERSION} VERSION_LESS "14.0")
-      set(ENV{MACOSX_DEPLOYMENT_TARGET} 13.0)
+      set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
     else()
-      set(ENV{MACOSX_DEPLOYMENT_TARGET} 14.0)
+      set(CMAKE_OSX_DEPLOYMENT_TARGET 14.0)
     endif()
   endif()
-  message(STATUS "macOS deployment target - $ENV{MACOSX_DEPLOYMENT_TARGET}")
-endfunction()
+  message(STATUS "macOS deployment target - ${CMAKE_OSX_DEPLOYMENT_TARGET}")
+endmacro()
 
 # Helper to configure Win32 platform
-function(configure_win32_platform)
+macro(configure_win32_platform)
   # A few of warning suppressions for Windows.
   if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     add_compile_options(/wd4101 /wd4267 /wd4477)
@@ -167,28 +167,26 @@ function(configure_win32_platform)
     add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
     add_link_options(/ignore:4217)
   endif()
-endfunction()
+endmacro()
 
 # Helper to configure Linux platform
-function(configure_linux_platform)
+macro(configure_linux_platform)
   add_compile_options(-fdata-sections -ffunction-sections)
   add_link_options(-Wl,--gc-sections -Wl,--strip-all)
-endfunction()
+endmacro()
 
 # Helper to configure default CUDA setup.
-function(configure_cuda_flags)
-  find_package(CUDAToolkit REQUIRED)
-  if(NOT DEFINED ENV{CUDACXX})
+macro(configure_cuda_flags)
+  if(NOT CMAKE_CUDA_COMPILER)
     # Enabling CUDA language support requires nvcc available. Here, we use
     # FindCUDAToolkit to detect nvcc executable.
-    set(ENV{CUDACXX} ${CUDAToolkit_NVCC_EXECUTABLE})
+    find_package(CUDAToolkit REQUIRED)
+    set(CMAKE_CUDA_COMPILER ${CUDAToolkit_NVCC_EXECUTABLE})
   endif()
   # Set default CUDA architecture to all-major.
-  if(NOT DEFINED ENV{CUDAARCHS})
-    set(ENV{CUDAARCHS} all-major)
+  if(NOT CMAKE_CUDA_ARCHITECTURES)
+    set(CMAKE_CUDA_ARCHITECTURES all-major)
   endif()
-  # Enable CUDA language support.
-  enable_language(CUDA)
   # NOTE: NVCC has '-forward-unknown-to-host-compiler' option set by default. It
   # is safe to use compiler flags without `-Xcompiler=` option.
-endfunction()
+endmacro()

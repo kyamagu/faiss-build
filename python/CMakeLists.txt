@@ -6,11 +6,6 @@ if(FAISS_ENABLE_SABI)
 else()
   find_package(Python REQUIRED COMPONENTS Interpreter Development.Module NumPy)
 endif()
-if(FAISS_ENABLE_GPU)
-  find_package(CUDAToolkit REQUIRED)
-elseif(FAISS_ENABLE_ROCM)
-  find_package(hip REQUIRED)
-endif()
 
 # Swig configurations.
 include(${SWIG_USE_FILE})
