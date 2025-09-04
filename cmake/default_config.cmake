@@ -187,6 +187,9 @@ macro(configure_cuda_flags)
   if(NOT CMAKE_CUDA_ARCHITECTURES)
     set(CMAKE_CUDA_ARCHITECTURES all-major)
   endif()
+  if(NOT CMAKE_CUDA_FLAGS)
+    set(CMAKE_CUDA_FLAGS -Wno-deprecated-gpu-targets)
+  endif()
   # NOTE: NVCC has '-forward-unknown-to-host-compiler' option set by default. It
   # is safe to use compiler flags without `-Xcompiler=` option.
 endmacro()
