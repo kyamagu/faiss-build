@@ -1,46 +1,104 @@
 # Top-level default configuration for faiss-build
-set(FAISS_OPT_LEVEL
+
+# Optimization levels; e.g., "generic,avx2"
+set(FAISS_OPT_LEVELS
     "generic"
-    CACHE STRING
-          "Optimization level, one of <generic|avx2|avx512|avx512_spr|sve>")
-if(DEFINED ENV{FAISS_OPT_LEVEL})
-  set(FAISS_OPT_LEVEL
-      $ENV{FAISS_OPT_LEVEL}
+    CACHE
+      STRING
+      "Optimization level, comma-separated string of <generic|avx2|avx512|avx512_spr|sve>."
+)
+if(DEFINED ENV{FAISS_OPT_LEVELS})
+  set(FAISS_OPT_LEVELS
+      $ENV{FAISS_OPT_LEVELS}
       CACHE STRING "Optimization level." FORCE)
 endif()
-
-option(FAISS_ENABLE_GPU "Enable support for GPU indexes." OFF)
-if(DEFINED ENV{FAISS_ENABLE_GPU})
-  set(FAISS_ENABLE_GPU
-      $ENV{FAISS_ENABLE_GPU}
-      CACHE BOOL "Enable support for GPU indexes." FORCE)
+string(REPLACE "," ";" FAISS_OPT_LEVELS "${FAISS_OPT_LEVELS}")
+list(TRANSFORM FAISS_OPT_LEVELS STRIP)
+set(FAISS_OPT_LEVELS_VALUES "generic;avx2;avx512;avx512_spr;sve")
+foreach(level IN LISTS FAISS_OPT_LEVELS)
+  if(NOT level IN_LIST FAISS_OPT_LEVELS_VALUES)
+    message(FATAL_ERROR "Invalid FAISS_OPT_LEVELS value: ${level}.\
+        Supported values are combination of: ${FAISS_OPT_LEVELS_VALUES}")
+  endif()
+endforeach()
+if(NOT FAISS_OPT_LEVELS)
+  message(FATAL_ERROR "FAISS_OPT_LEVELS is empty.")
 endif()
-option(FAISS_ENABLE_ROCM "Enable support for ROCm" OFF)
-option(FAISS_ENABLE_CUVS "Enable support for cuVS" OFF)
+message(STATUS "Faiss optimization levels - ${FAISS_OPT_LEVELS}")
+
+# GPU supports.
+set(FAISS_GPU_SUPPORT
+    OFF
+    CACHE STRING "GPU support, one of <OFF|CUDA|CUVS|ROCM>.")
+if(DEFINED ENV{FAISS_GPU_SUPPORT})
+  set(FAISS_GPU_SUPPORT
+      $ENV{FAISS_GPU_SUPPORT}
+      CACHE STRING "GPU support, one of <OFF|CUDA|CUVS|ROCM>." FORCE)
+endif()
+set(FAISS_GPU_SUPPORT_VALUES "OFF;CUDA;CUVS;ROCM")
+set_property(CACHE FAISS_GPU_SUPPORT PROPERTY STRINGS FAISS_GPU_SUPPORT_VALUES)
+if(NOT FAISS_GPU_SUPPORT IN_LIST FAISS_GPU_SUPPORT_VALUES)
+  message(FATAL_ERROR "Invalid FAISS_GPU_SUPPORT value: ${FAISS_GPU_SUPPORT}.\
+  Supported values are: ${FAISS_GPU_SUPPORT_VALUES}")
+endif()
+
+# Expand variables for GPU support in the faiss cmake config.
+if(FAISS_GPU_SUPPORT)
+  set(FAISS_ENABLE_GPU ON)
+  if(FAISS_GPU_SUPPORT STREQUAL "CUDA")
+    set(FAISS_ENABLE_CUDA ON) # This is not a faiss cmake config variable.
+  elseif(FAISS_GPU_SUPPORT STREQUAL "CUVS")
+    set(FAISS_ENABLE_CUDA ON)
+    set(FAISS_ENABLE_CUVS ON)
+  elseif(FAISS_GPU_SUPPORT STREQUAL "ROCM")
+    set(FAISS_ENABLE_ROCM ON)
+  endif()
+else()
+  set(FAISS_ENABLE_GPU OFF)
+endif()
+message(STATUS "Faiss GPU support - ${FAISS_GPU_SUPPORT}")
+
+# LTO option.
 option(FAISS_USE_LTO "Enable Link Time Optimization (LTO)." ON)
 
-set(FAISS_ENABLE_EXTRAS OFF)
-set(BUILD_TESTING OFF)
-set(FAISS_ENABLE_PYTHON OFF) # We use our own Python build configuration.
+# CUDA static link option.
+option(FAISS_GPU_STATIC "Enable static linking of CUDA libraries." OFF)
+
+# Python package name.
 set(PYTHON_PACKAGE_NAME
     "faiss"
     CACHE STRING "Python package name, default to faiss")
 
-# SABI options. TODO: Derive the hex value from SKBUILD_SABI_VERSION.
+# Py_LIMITED_API value, default to <0x03090000>. TODO: Derive the hex value from
+# SKBUILD_SABI_VERSION.
 set(PY_LIMITED_API
     "0x03090000"
     CACHE STRING "Py_LIMITED_API macro value")
-include(CMakeDependentOption)
-cmake_dependent_option(ENABLE_SABI "Enable stable ABI." ON
-                       "SKBUILD_SABI_VERSION" OFF)
-message(STATUS "Optimization level - ${FAISS_OPT_LEVEL}")
-message(STATUS "Stable ABI - ${SKBUILD_SABI_VERSION}")
+
+# Default overrides for building Python bindings.
+set(FAISS_ENABLE_EXTRAS OFF)
+set(BUILD_TESTING OFF)
+set(FAISS_ENABLE_PYTHON OFF) # We use our own Python build configuration.
+
+if(SKBUILD_SABI_VERSION)
+  set(FAISS_ENABLE_SABI ON)
+  message(STATUS "Stable ABI - ${SKBUILD_SABI_VERSION}")
+else()
+  set(FAISS_ENABLE_SABI OFF)
+  message(STATUS "Stable ABI - OFF")
+endif()
 
 # Helper to define default build options.
-function(configure_default_options)
-  set(CMAKE_CXX_STANDARD 17 PARENT_SCOPE)
-  set(CMAKE_CXX_STANDARD_REQUIRED ON PARENT_SCOPE)
-  set(CMAKE_CXX_EXTENSIONS OFF PARENT_SCOPE)
+macro(configure_default_options)
+  set(CMAKE_CXX_STANDARD
+      17
+     )
+  set(CMAKE_CXX_STANDARD_REQUIRED
+      ON
+     )
+  set(CMAKE_CXX_EXTENSIONS
+      OFF
+     )
 
   # Set up platform-specific global flags.
   if(APPLE)
@@ -51,50 +109,54 @@ function(configure_default_options)
     configure_win32_platform()
   endif()
 
+  # Set up global CUDA flags.
+  if(FAISS_ENABLE_CUDA)
+    configure_cuda_flags()
+  endif()
+
   # Use ccache if available.
   find_program(CCACHE_FOUND ccache)
   if(CCACHE_FOUND)
     message(STATUS "ccache enabled")
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
   endif()
-endfunction()
+endmacro()
 
 # Helper to configure Apple platform
-function(configure_apple_platform)
+macro(configure_apple_platform)
   add_compile_options(-Wno-unused-function -Wno-format
                       -Wno-deprecated-declarations)
   add_link_options(-dead_strip)
   # Set OpenMP_ROOT from Homebrew.
-  if(NOT DEFINED OpenMP_ROOT)
+  if(NOT ENV{OpenMP_ROOT})
     find_program(HOMEBREW_FOUND brew)
     if(HOMEBREW_FOUND)
       execute_process(
         COMMAND brew --prefix libomp
         OUTPUT_VARIABLE HOMEBREW_LIBOMP_PREFIX
         OUTPUT_STRIP_TRAILING_WHITESPACE)
-      set(OpenMP_ROOT
-          "${HOMEBREW_LIBOMP_PREFIX}"
-          CACHE PATH "OpenMP root from Homebrew")
+      set(ENV{OpenMP_ROOT} ${HOMEBREW_LIBOMP_PREFIX})
     endif()
   endif()
-  # Set MACOSX_DEPLOYMENT_TARGET.
-  # NOTE: This is a workaround for the compatibility with libomp on Homebrew.
-  # For C++17 compatibility, the minimum required version is 10.13.
-  if(NOT DEFINED ENV{MACOSX_DEPLOYMENT_TARGET})
-    execute_process(COMMAND sw_vers -productVersion
-                    OUTPUT_VARIABLE MACOSX_VERSION
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  # Set MACOSX_DEPLOYMENT_TARGET. NOTE: This is a workaround for the
+  # compatibility with libomp on Homebrew. For C++17 compatibility, the minimum
+  # required version is 10.13.
+  if(NOT DEFINED CMAKE_OSX_DEPLOYMENT_TARGET)
+    execute_process(
+      COMMAND sw_vers -productVersion
+      OUTPUT_VARIABLE MACOSX_VERSION
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
     if(${MACOSX_VERSION} VERSION_LESS "14.0")
-      set(ENV{MACOSX_DEPLOYMENT_TARGET} 13.0)
+      set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
     else()
-      set(ENV{MACOSX_DEPLOYMENT_TARGET} 14.0)
+      set(CMAKE_OSX_DEPLOYMENT_TARGET 14.0)
     endif()
   endif()
-  message(STATUS "MACOSX_DEPLOYMENT_TARGET - $ENV{MACOSX_DEPLOYMENT_TARGET}")
-endfunction()
+  message(STATUS "macOS deployment target - ${CMAKE_OSX_DEPLOYMENT_TARGET}")
+endmacro()
 
 # Helper to configure Win32 platform
-function(configure_win32_platform)
+macro(configure_win32_platform)
   # A few of warning suppressions for Windows.
   if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     add_compile_options(/wd4101 /wd4267 /wd4477)
@@ -105,33 +167,29 @@ function(configure_win32_platform)
     add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
     add_link_options(/ignore:4217)
   endif()
-endfunction()
+endmacro()
 
 # Helper to configure Linux platform
-function(configure_linux_platform)
-  if(${FAISS_ENABLE_GPU} AND NOT ${FAISS_ENABLE_ROCM})
-    configure_cuda_flags()
-  endif()
-  # TODO: Disable the following for CUDA objects.
+macro(configure_linux_platform)
   add_compile_options(-fdata-sections -ffunction-sections)
-  add_link_options(-Wl,--gc-sections)
-endfunction()
+  add_link_options(-Wl,--gc-sections -Wl,--strip-all)
+endmacro()
 
 # Helper to configure default CUDA setup.
-function(configure_cuda_flags)
-  find_package(CUDAToolkit REQUIRED)
-  if(NOT DEFINED ENV{CUDACXX})
+macro(configure_cuda_flags)
+  if(NOT CMAKE_CUDA_COMPILER)
     # Enabling CUDA language support requires nvcc available. Here, we use
     # FindCUDAToolkit to detect nvcc executable.
-    set(ENV{CUDACXX} ${CUDAToolkit_NVCC_EXECUTABLE})
+    find_package(CUDAToolkit REQUIRED)
+    set(CMAKE_CUDA_COMPILER ${CUDAToolkit_NVCC_EXECUTABLE})
   endif()
   # Set default CUDA architecture to all-major.
-  if(NOT DEFINED ENV{CUDAARCHS})
-    set(ENV{CUDAARCHS} all-major)
+  if(NOT CMAKE_CUDA_ARCHITECTURES)
+    set(CMAKE_CUDA_ARCHITECTURES all-major)
   endif()
-  if(NOT DEFINED ENV{CUDAFLAGS})
-    set(ENV{CUDAFLAGS} -Wno-deprecated-gpu-targets)
+  if(NOT CMAKE_CUDA_FLAGS)
+    set(CMAKE_CUDA_FLAGS -Wno-deprecated-gpu-targets)
   endif()
-  # Enable CUDA language support.
-  enable_language(CUDA)
-endfunction()
+  # NOTE: NVCC has '-forward-unknown-to-host-compiler' option set by default. It
+  # is safe to use compiler flags without `-Xcompiler=` option.
+endmacro()

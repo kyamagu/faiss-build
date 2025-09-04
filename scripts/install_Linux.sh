@@ -52,6 +52,6 @@ function install_cuda() {
 }
 
 install_openblas
-if [ "${FAISS_ENABLE_GPU:-OFF}" = "ON" ]; then
+if [ ! "${FAISS_GPU_SUPPORT:-OFF}" = "OFF" ]; then
     install_cuda
 fi
