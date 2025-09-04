@@ -172,7 +172,7 @@ endfunction()
 # Helper to configure Linux platform
 function(configure_linux_platform)
   add_compile_options(-fdata-sections -ffunction-sections)
-  add_link_options(-Wl,--gc-sections --strip-all)
+  add_link_options(-Wl,--gc-sections -Wl,--strip-all)
 endfunction()
 
 # Helper to configure default CUDA setup.
