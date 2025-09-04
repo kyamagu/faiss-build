@@ -6,7 +6,7 @@ if(FAISS_ENABLE_SABI)
 else()
   find_package(Python REQUIRED COMPONENTS Interpreter Development.Module NumPy)
 endif()
-find_package(OpenMP)
+find_package(OpenMP REQUIRED)
 
 # Swig configurations.
 include(${SWIG_USE_FILE})
