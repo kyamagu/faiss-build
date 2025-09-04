@@ -72,7 +72,12 @@ EOF
         dnf clean all
         dnf install -y \
             rocm-developer-tools \
-            rocm-hip-runtime-devel
+            rocm-hip-runtime-devel \
+            rocm-hip-sdk
+        tee /etc/ld.so.conf.d/99-gcc-toolset-14.conf <<EOF
+/opt/rh/gcc-toolset-14/root/usr/lib64
+/opt/rh/gcc-toolset-14/root/usr/lib/gcc/x86_64-redhat-linux/14
+EOF
     elif command -v apt &> /dev/null; then
         local DISTRO=${DISTRO:-noble}
         wget https://repo.radeon.com/rocm/rocm.gpg.key -O - \
@@ -82,11 +87,7 @@ EOF
         echo -e 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600' \
             | tee /etc/apt/preferences.d/rocm-pin-600
         apt update
-        apt install -y rocm-hip-runtime-devel
-        tee /etc/ld.so.conf.d/99-gcc-toolset-14.conf <<EOF
-/opt/rh/gcc-toolset-14/root/usr/lib64
-/opt/rh/gcc-toolset-14/root/usr/lib/gcc/x86_64-redhat-linux/14
-EOF
+        apt install -y rocm-hip-runtime-devel rocm-hip-sdk
         ldconfig
     else
         echo "Unsupported package manager. Please install ROCm manually."
