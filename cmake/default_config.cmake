@@ -107,6 +107,11 @@ function(configure_default_options)
     configure_win32_platform()
   endif()
 
+  # Set up global CUDA flags.
+  if(FAISS_ENABLE_CUDA)
+    configure_cuda_flags()
+  endif()
+
   # Use ccache if available.
   find_program(CCACHE_FOUND ccache)
   if(CCACHE_FOUND)
@@ -166,12 +171,8 @@ endfunction()
 
 # Helper to configure Linux platform
 function(configure_linux_platform)
-  if(FAISS_ENABLE_CUDA)
-    configure_cuda_flags()
-  endif()
-  # NVCC has '-forward-unknown-to-host-compiler' option set by default.
   add_compile_options(-fdata-sections -ffunction-sections)
-  add_link_options(-Wl,--gc-sections)
+  add_link_options(-Wl,--gc-sections --strip-all)
 endfunction()
 
 # Helper to configure default CUDA setup.
@@ -188,4 +189,6 @@ function(configure_cuda_flags)
   endif()
   # Enable CUDA language support.
   enable_language(CUDA)
+  # NOTE: NVCC has '-forward-unknown-to-host-compiler' option set by default. It
+  # is safe to use compiler flags without `-Xcompiler=` option.
 endfunction()

@@ -55,7 +55,6 @@ function(configure_gpu_properties target)
     PROPERTY SWIG_COMPILE_DEFINITIONS GPU_WRAPPER)
   if(FAISS_ENABLE_CUDA)
     target_include_directories(${target} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
-    # target_link_libraries(${target} PRIVATE ${CUDA_LIBS})
     if(FAISS_ENABLE_CUVS)
       set_property(
         TARGET ${target}
@@ -97,14 +96,14 @@ function(configure_extension suffix)
   if(WIN32)
     set_property(TARGET ${target} PROPERTY SWIG_COMPILE_DEFINITIONS SWIGWIN)
     target_compile_options(${target} PRIVATE /bigobj)
-  elseif(APPLE)
-    # Nothing here.
-  else()
+  elseif(NOT APPLE)
     set_property(TARGET ${target} PROPERTY SWIG_COMPILE_DEFINITIONS
                                            SWIGWORDSIZE64)
-    if(FAISS_ENABLE_GPU)
-      configure_gpu_properties(${target})
-    endif()
+  endif()
+
+  # Set up GPU flags.
+  if(FAISS_ENABLE_GPU)
+    configure_gpu_properties(${target})
   endif()
 
   configure_python_properties(${target})
