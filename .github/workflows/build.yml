@@ -11,6 +11,7 @@ jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    if: false  # Disabled for now due to lack of GPU support in GitHub Actions
     strategy:
       matrix:
         include:
@@ -56,6 +57,7 @@ jobs:
   build_cuda_wheels:
     name: Build CUDA wheels
     runs-on: ubuntu-24.04
+    if: false  # Disabled for now due to lack of GPU support in GitHub Actions
     steps:
       - uses: actions/checkout@v5
         with:
@@ -66,3 +68,19 @@ jobs:
           CIBW_BUILD: cp3*-manylinux_x86_64
           CIBW_ENVIRONMENT: >
             FAISS_GPU_SUPPORT=CUDA
+
+  build_rocm_wheels:
+    name: Build ROCm wheels
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v3.1.4
+        env:
+          CIBW_BUILD: cp312-manylinux_x86_64
+          CIBW_ENVIRONMENT: >
+            FAISS_GPU_SUPPORT=ROCM
+            SKBUILD_BUILD_VERBOSE=true
+            LDFLAGS="-L{DEVTOOLSET_ROOTPATH}/lib64 -Wl,-rpath,{DEVTOOLSET_ROOTPATH}/lib64"
