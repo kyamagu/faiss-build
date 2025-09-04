@@ -11,23 +11,21 @@ jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    # Temporarily disable
-    if: false
     strategy:
       matrix:
         include:
           - os: ubuntu-24.04
-            opt_level: generic;avx2;avx512
+            opt_levels: generic;avx2;avx512
           - os: ubuntu-24.04-arm
-            opt_level: generic;sve
+            opt_levels: generic;sve
           - os: macos-13
-            opt_level: generic;avx2
+            opt_levels: generic;avx2
           - os: macos-14
-            opt_level: generic
+            opt_levels: generic
           - os: windows-2022
-            opt_level: generic;avx2
+            opt_levels: generic;avx2
           - os: windows-11-arm
-            opt_level: generic
+            opt_levels: generic
     steps:
       - uses: actions/checkout@v5
         with:
@@ -38,18 +36,18 @@ jobs:
         with:
           arch: ${{ matrix.os == 'windows-11-arm' && 'arm64' || 'x64' }}
         if: runner.os == 'Windows'
-      # NOTE: Linux needs a setup from before-all hook, because they are inside containers.
       - name: Install system dependencies (Windows)
         run: ./scripts/install_Windows.ps1
         if: runner.os == 'Windows'
       - name: Install system dependencies (macOS)
         run: ./scripts/install_macOS.sh
         if: runner.os == 'macOS'
+      # NOTE: Linux needs a setup from before-all hook, because they are inside containers.
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.1.4
         env:
           CIBW_ENVIRONMENT: >
-            FAISS_OPT_LEVELS="${{ matrix.opt_level }}"
+            FAISS_OPT_LEVELS="${{ matrix.opt_levels }}"
       - uses: actions/upload-artifact@v4
         with:
           name: wheel-${{ matrix.os }}
@@ -65,9 +63,6 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.1.4
         env:
-          CIBW_BUILD: cp311-manylinux_x86_64
+          CIBW_BUILD: cp3*-manylinux_x86_64
           CIBW_ENVIRONMENT: >
-            SKBUILD_BUILD_VERBOSE=true
-            FAISS_OPT_LEVELS=avx2
             FAISS_GPU_SUPPORT=CUDA
-            SKBUILD_CMAKE_DEFINE="FAISS_GPU_STATIC=ON;CMAKE_CUDA_ARCHITECTURES=75"
