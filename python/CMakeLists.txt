@@ -20,7 +20,7 @@ function(configure_python_properties target)
     target_compile_definitions(${target}
                                PRIVATE Py_LIMITED_API=${PY_LIMITED_API})
     target_link_libraries(${target} PRIVATE Python::SABIModule)
-    if(NOT SKBUILD_SOABI)
+    if("${SKBUILD_SOABI}" STREQUAL "")
       set(SKBUILD_SOABI "abi3")
     endif()
     if(WIN32)
