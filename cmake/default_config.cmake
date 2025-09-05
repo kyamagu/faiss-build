@@ -112,6 +112,8 @@ macro(configure_default_options)
   # Set up global CUDA flags.
   if(FAISS_ENABLE_CUDA)
     configure_cuda_flags()
+  elseif(FAISS_ENABLE_ROCM)
+    configure_rocm_flags()
   endif()
 
   # Use ccache if available.
@@ -192,4 +194,16 @@ macro(configure_cuda_flags)
   endif()
   # NOTE: NVCC has '-forward-unknown-to-host-compiler' option set by default. It
   # is safe to use compiler flags without `-Xcompiler=` option.
+endmacro()
+
+# Helper to configure default ROCm setup.
+macro(configure_rocm_flags)
+  if(NOT CMAKE_HIP_ARCHITECTURES)
+    # Check supported GPUs at the ROCm official documentation:
+    # https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/system-requirements.html
+    set(CMAKE_HIP_ARCHITECTURES gfx908;gfx90a;gfx942;gfx1030;gfx1100;gfx1101;gfx1200;gfx1201)
+  endif()
+  if(NOT CMAKE_HIP_FLAGS)
+    set(CMAKE_HIP_FLAGS "-Wno-deprecated-pragma -Wno-unused-result -Wno-deprecated-declarations")
+  endif()
 endmacro()

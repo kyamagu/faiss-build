@@ -53,9 +53,14 @@ jobs:
           name: wheel-${{ matrix.os }}
           path: ./wheelhouse/*.whl
 
-  build_cuda_wheels:
-    name: Build CUDA wheels
+  build_gpu_wheels:
+    name: Build GPU wheels (${{ matrix.gpu }})
     runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        include:
+          - gpu: CUDA
+          - gpu: ROCM
     steps:
       - uses: actions/checkout@v5
         with:
@@ -65,4 +70,5 @@ jobs:
         env:
           CIBW_BUILD: cp3*-manylinux_x86_64
           CIBW_ENVIRONMENT: >
-            FAISS_GPU_SUPPORT=CUDA
+            FAISS_GPU_SUPPORT=${{ matrix.gpu }}
+            FAISS_OPT_LEVELS=avx2

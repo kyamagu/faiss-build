@@ -7,6 +7,9 @@ else()
   find_package(Python REQUIRED COMPONENTS Interpreter Development.Module NumPy)
 endif()
 find_package(OpenMP REQUIRED)
+if(FAISS_ENABLE_ROCM)
+  find_package(hip REQUIRED)
+endif()
 
 # Swig configurations.
 include(${SWIG_USE_FILE})
