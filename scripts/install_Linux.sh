@@ -92,6 +92,7 @@ EOF
             rocm-hip-runtime-devel \
             hipblas-devel \
             hiprand-devel \
+            rocrand-devel \
             rocthrust-devel
         echo "/opt/rocm/lib" > /etc/ld.so.conf.d/rocm.conf && ldconfig
     else
