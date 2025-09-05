@@ -74,6 +74,7 @@ EOF
             rocm-hip-runtime-devel \
             hipblas-devel \
             hiprand-devel \
+            rocrand-devel \
             rocthrust-devel
         ln -s libstdc++.so.6 /usr/lib64/libstdc++.so
         echo "/opt/rocm/lib" > /etc/ld.so.conf.d/rocm.conf && ldconfig
