@@ -69,7 +69,11 @@ priority=50
 gpgcheck=1
 gpgkey=https://repo.radeon.com/rocm/rocm.gpg.key
 EOF
-        dnf install -y rocm-hip-sdk
+        dnf install -y \
+            rocm-llvm \
+            rocm-hip-runtime-devel \
+            hipblas-devel \
+            hiprand-devel
         ln -s libstdc++.so.6 /usr/lib64/libstdc++.so
         echo "/opt/rocm/lib" > /etc/ld.so.conf.d/rocm.conf && ldconfig
     elif command -v apt &> /dev/null; then
@@ -81,7 +85,11 @@ EOF
         echo -e 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600' \
             | tee /etc/apt/preferences.d/rocm-pin-600
         apt update
-        apt install -y rocm-hip-sdk
+        apt install -y \
+            rocm-llvm \
+            rocm-hip-runtime-devel \
+            hipblas-devel \
+            hiprand-devel
         echo "/opt/rocm/lib" > /etc/ld.so.conf.d/rocm.conf && ldconfig
     else
         echo "Unsupported package manager. Please install ROCm manually."
