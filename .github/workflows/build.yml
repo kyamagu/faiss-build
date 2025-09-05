@@ -11,7 +11,6 @@ jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    if: false  # Disabled for now due to lack of GPU support in GitHub Actions
     strategy:
       matrix:
         include:
@@ -54,10 +53,14 @@ jobs:
           name: wheel-${{ matrix.os }}
           path: ./wheelhouse/*.whl
 
-  build_cuda_wheels:
-    name: Build CUDA wheels
+  build_gpu_wheels:
+    name: Build GPU wheels (${{ matrix.gpu }})
     runs-on: ubuntu-24.04
-    if: false  # Disabled for now due to lack of GPU support in GitHub Actions
+    strategy:
+      matrix:
+        include:
+          - gpu: CUDA
+          - gpu: ROCM
     steps:
       - uses: actions/checkout@v5
         with:
@@ -67,19 +70,5 @@ jobs:
         env:
           CIBW_BUILD: cp3*-manylinux_x86_64
           CIBW_ENVIRONMENT: >
-            FAISS_GPU_SUPPORT=CUDA
-
-  build_rocm_wheels:
-    name: Build ROCm wheels
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          submodules: true
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v3.1.4
-        env:
-          CIBW_BUILD: cp312-manylinux_x86_64
-          CIBW_ENVIRONMENT: >
-            FAISS_GPU_SUPPORT=ROCM
-            SKBUILD_BUILD_VERBOSE=true
+            FAISS_GPU_SUPPORT=${{ matrix.gpu }}
+            FAISS_OPT_LEVELS=avx2
