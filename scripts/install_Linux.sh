@@ -71,6 +71,7 @@ gpgkey=https://repo.radeon.com/rocm/rocm.gpg.key
 EOF
         dnf install -y rocm-hip-sdk
         ln -s libstdc++.so.6 /usr/lib64/libstdc++.so
+        echo "/opt/rocm/lib" > /etc/ld.so.conf.d/rocm.conf && ldconfig
     elif command -v apt &> /dev/null; then
         local DISTRO=${DISTRO:-noble}
         wget https://repo.radeon.com/rocm/rocm.gpg.key -O - \
@@ -81,6 +82,7 @@ EOF
             | tee /etc/apt/preferences.d/rocm-pin-600
         apt update
         apt install -y rocm-hip-sdk
+        echo "/opt/rocm/lib" > /etc/ld.so.conf.d/rocm.conf && ldconfig
     else
         echo "Unsupported package manager. Please install ROCm manually."
     fi
