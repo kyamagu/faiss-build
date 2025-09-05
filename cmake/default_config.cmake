@@ -199,9 +199,11 @@ endmacro()
 # Helper to configure default ROCm setup.
 macro(configure_rocm_flags)
   if(NOT CMAKE_HIP_ARCHITECTURES)
-    set(CMAKE_HIP_ARCHITECTURES gfx900;gfx906;gfx908;gfx90a;gfx1030;gfx1100;gfx1101;gfx1102)
+    # Check supported GPUs at the ROCm official documentation:
+    # https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/system-requirements.html
+    set(CMAKE_HIP_ARCHITECTURES gfx908;gfx90a;gfx942;gfx1030;gfx1100;gfx1101;gfx1200;gfx1201)
   endif()
   if(NOT CMAKE_HIP_FLAGS)
-    set(CMAKE_HIP_FLAGS "-Wno-unused-function -Wno-format -Wno-deprecated-declarations -Wno-deprecated-pragma")
+    set(CMAKE_HIP_FLAGS "-Wno-deprecated-pragma -Wno-unused-result")
   endif()
 endmacro()
