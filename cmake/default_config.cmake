@@ -175,6 +175,21 @@ endmacro()
 macro(configure_linux_platform)
   add_compile_options(-fdata-sections -ffunction-sections)
   add_link_options(-Wl,--gc-sections -Wl,--strip-all)
+
+  # Set Intel MKL cmake config path from MKLROOT environment variable.
+  if(DEFINED ENV{BLA_VENDOR})
+    set(BLA_VENDOR $ENV{BLA_VENDOR})
+  endif()
+  if(BLA_VENDOR MATCHES "Intel*")
+    if(NOT ENV{MKLROOT})
+      # Fallback to oneAPI installation path.
+      if(NOT EXISTS /opt/intel/oneapi/mkl/latest)
+        message(FATAL_ERROR "MKLROOT is not set and oneAPI MKL path not found.")
+      endif()
+      set(ENV{MKLROOT} /opt/intel/oneapi/mkl/latest)
+    endif()
+    set(CMAKE_MODULE_PATH $ENV{MKLROOT}/lib/cmake ${CMAKE_MODULE_PATH})
+  endif()
 endmacro()
 
 # Helper to configure default CUDA setup.
