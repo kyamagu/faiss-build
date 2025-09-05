@@ -73,7 +73,8 @@ EOF
             rocm-llvm \
             rocm-hip-runtime-devel \
             hipblas-devel \
-            hiprand-devel
+            hiprand-devel \
+            rocthrust-devel
         ln -s libstdc++.so.6 /usr/lib64/libstdc++.so
         echo "/opt/rocm/lib" > /etc/ld.so.conf.d/rocm.conf && ldconfig
     elif command -v apt &> /dev/null; then
@@ -89,7 +90,8 @@ EOF
             rocm-llvm \
             rocm-hip-runtime-devel \
             hipblas-devel \
-            hiprand-devel
+            hiprand-devel \
+            rocthrust-devel
         echo "/opt/rocm/lib" > /etc/ld.so.conf.d/rocm.conf && ldconfig
     else
         echo "Unsupported package manager. Please install ROCm manually."
