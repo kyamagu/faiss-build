@@ -90,15 +90,9 @@ endif()
 
 # Helper to define default build options.
 macro(configure_default_options)
-  set(CMAKE_CXX_STANDARD
-      17
-     )
-  set(CMAKE_CXX_STANDARD_REQUIRED
-      ON
-     )
-  set(CMAKE_CXX_EXTENSIONS
-      OFF
-     )
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_CXX_EXTENSIONS OFF)
 
   # Set up platform-specific global flags.
   if(APPLE)
@@ -188,7 +182,8 @@ macro(configure_linux_platform)
       endif()
       set(ENV{MKLROOT} /opt/intel/oneapi/mkl/latest)
     endif()
-    set(CMAKE_MODULE_PATH $ENV{MKLROOT}/lib/cmake ${CMAKE_MODULE_PATH})
+    list(APPEND CMAKE_PREFIX_PATH "$ENV{MKLROOT}")
+    find_package(MKL REQUIRED)
   endif()
 endmacro()
 
@@ -216,9 +211,12 @@ macro(configure_rocm_flags)
   if(NOT CMAKE_HIP_ARCHITECTURES)
     # Check supported GPUs at the ROCm official documentation:
     # https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/system-requirements.html
-    set(CMAKE_HIP_ARCHITECTURES gfx908;gfx90a;gfx942;gfx1030;gfx1100;gfx1101;gfx1200;gfx1201)
+    set(CMAKE_HIP_ARCHITECTURES
+        gfx908;gfx90a;gfx942;gfx1030;gfx1100;gfx1101;gfx1200;gfx1201)
   endif()
   if(NOT CMAKE_HIP_FLAGS)
-    set(CMAKE_HIP_FLAGS "-Wno-deprecated-pragma -Wno-unused-result -Wno-deprecated-declarations")
+    set(CMAKE_HIP_FLAGS
+        "-Wno-deprecated-pragma -Wno-unused-result -Wno-deprecated-declarations"
+    )
   endif()
 endmacro()
