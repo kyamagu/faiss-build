@@ -35,7 +35,10 @@ repo_gpgcheck=1
 gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
 EOF
         dnf install -y intel-oneapi-mkl-devel
-        echo "/opt/intel/oneapi/mkl/latest/lib" > /etc/ld.so.conf.d/oneapi.conf && ldconfig
+        tee /etc/ld.so.conf.d/oneapi.conf <<EOF
+/opt/intel/oneapi/mkl/latest/lib
+/opt/intel/oneapi/compiler/latest/lib/
+EOF && ldconfig
     elif command -v apt &> /dev/null; then
         wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
             | gpg --dearmor \
@@ -43,7 +46,10 @@ EOF
         echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
             | tee /etc/apt/sources.list.d/oneAPI.list
         apt update && apt install -y intel-oneapi-mkl-devel
-        echo "/opt/intel/oneapi/mkl/latest/lib" > /etc/ld.so.conf.d/oneapi.conf && ldconfig
+        tee /etc/ld.so.conf.d/oneapi.conf <<EOF
+/opt/intel/oneapi/mkl/latest/lib
+/opt/intel/oneapi/compiler/latest/lib/
+EOF && ldconfig
     else
         echo "Unsupported package manager. Please install Intel MKL manually."
     fi
