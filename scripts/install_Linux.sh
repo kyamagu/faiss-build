@@ -38,7 +38,8 @@ EOF
         tee /etc/ld.so.conf.d/oneapi.conf <<EOF
 /opt/intel/oneapi/mkl/latest/lib
 /opt/intel/oneapi/compiler/latest/lib/
-EOF && ldconfig
+EOF
+        ldconfig
     elif command -v apt &> /dev/null; then
         wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
             | gpg --dearmor \
@@ -49,7 +50,8 @@ EOF && ldconfig
         tee /etc/ld.so.conf.d/oneapi.conf <<EOF
 /opt/intel/oneapi/mkl/latest/lib
 /opt/intel/oneapi/compiler/latest/lib/
-EOF && ldconfig
+EOF 
+        ldconfig
     else
         echo "Unsupported package manager. Please install Intel MKL manually."
     fi
