@@ -25,7 +25,7 @@ function install_intel_mkl() {
     if command -v apk &> /dev/null; then
         echo "Intel MKL installation on Alpine is not supported yet."
     elif command -v dnf &> /dev/null; then
-        tee > /etc/yum.repos.d/oneAPI.repo << EOF
+        tee /etc/yum.repos.d/oneAPI.repo << EOF
 [oneAPI]
 name=Intel® oneAPI repository
 baseurl=https://yum.repos.intel.com/oneapi
@@ -50,7 +50,7 @@ EOF
         tee /etc/ld.so.conf.d/oneapi.conf <<EOF
 /opt/intel/oneapi/mkl/latest/lib
 /opt/intel/oneapi/compiler/latest/lib/
-EOF 
+EOF
         ldconfig
     else
         echo "Unsupported package manager. Please install Intel MKL manually."
