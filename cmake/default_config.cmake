@@ -169,7 +169,11 @@ endmacro()
 macro(configure_linux_platform)
   add_compile_options(-fdata-sections -ffunction-sections)
   add_link_options(-Wl,--gc-sections -Wl,--strip-all)
+  configure_blas_lapack()
+endmacro()
 
+# Helper to configure default BLAS/LAPACK setup.
+macro(configure_blas_lapack)
   # Set Intel MKL cmake config path from MKLROOT environment variable.
   if(DEFINED ENV{BLA_VENDOR})
     set(BLA_VENDOR $ENV{BLA_VENDOR})
@@ -184,6 +188,10 @@ macro(configure_linux_platform)
     endif()
     list(APPEND CMAKE_PREFIX_PATH "$ENV{MKLROOT}")
     find_package(MKL REQUIRED)
+
+    # Set OpenMP variables for Intel MKL.
+    set(OpenMP_CXX_LIB_NAMES libiomp5)
+    set(OpenMP_libiomp5_LIBRARY "${MKL_ROOT}/../../compiler/latest/lib/libiomp5.so")
   endif()
 endmacro()
 
