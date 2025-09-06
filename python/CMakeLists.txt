@@ -100,6 +100,11 @@ function(configure_extension suffix)
                                            SWIGWORDSIZE64)
   endif()
 
+  # Set up MKL flags.
+  if(BLA_VENDOR MATCHES "Intel*")
+    target_link_libraries(${target} PRIVATE MKL::MKL)
+  endif()
+
   # Set up GPU flags.
   if(FAISS_ENABLE_GPU)
     configure_gpu_properties(${target})

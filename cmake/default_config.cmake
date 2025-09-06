@@ -90,15 +90,9 @@ endif()
 
 # Helper to define default build options.
 macro(configure_default_options)
-  set(CMAKE_CXX_STANDARD
-      17
-     )
-  set(CMAKE_CXX_STANDARD_REQUIRED
-      ON
-     )
-  set(CMAKE_CXX_EXTENSIONS
-      OFF
-     )
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_CXX_EXTENSIONS OFF)
 
   # Set up platform-specific global flags.
   if(APPLE)
@@ -175,6 +169,30 @@ endmacro()
 macro(configure_linux_platform)
   add_compile_options(-fdata-sections -ffunction-sections)
   add_link_options(-Wl,--gc-sections -Wl,--strip-all)
+  configure_blas_lapack()
+endmacro()
+
+# Helper to configure default BLAS/LAPACK setup.
+macro(configure_blas_lapack)
+  # Set Intel MKL cmake config path from MKLROOT environment variable.
+  if(DEFINED ENV{BLA_VENDOR})
+    set(BLA_VENDOR $ENV{BLA_VENDOR})
+  endif()
+  if(BLA_VENDOR MATCHES "Intel*")
+    if(NOT ENV{MKLROOT})
+      # Fallback to oneAPI installation path.
+      if(NOT EXISTS /opt/intel/oneapi/mkl/latest)
+        message(FATAL_ERROR "MKLROOT is not set and oneAPI MKL path not found.")
+      endif()
+      set(ENV{MKLROOT} /opt/intel/oneapi/mkl/latest)
+    endif()
+    list(APPEND CMAKE_PREFIX_PATH "$ENV{MKLROOT}")
+    find_package(MKL REQUIRED)
+
+    # Set OpenMP variables for Intel MKL.
+    set(OpenMP_CXX_LIB_NAMES libiomp5)
+    set(OpenMP_libiomp5_LIBRARY "${MKL_ROOT}/../../compiler/latest/lib/libiomp5.so")
+  endif()
 endmacro()
 
 # Helper to configure default CUDA setup.
@@ -201,9 +219,12 @@ macro(configure_rocm_flags)
   if(NOT CMAKE_HIP_ARCHITECTURES)
     # Check supported GPUs at the ROCm official documentation:
     # https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/system-requirements.html
-    set(CMAKE_HIP_ARCHITECTURES gfx908;gfx90a;gfx942;gfx1030;gfx1100;gfx1101;gfx1200;gfx1201)
+    set(CMAKE_HIP_ARCHITECTURES
+        gfx908;gfx90a;gfx942;gfx1030;gfx1100;gfx1101;gfx1200;gfx1201)
   endif()
   if(NOT CMAKE_HIP_FLAGS)
-    set(CMAKE_HIP_FLAGS "-Wno-deprecated-pragma -Wno-unused-result -Wno-deprecated-declarations")
+    set(CMAKE_HIP_FLAGS
+        "-Wno-deprecated-pragma -Wno-unused-result -Wno-deprecated-declarations"
+    )
   endif()
 endmacro()
