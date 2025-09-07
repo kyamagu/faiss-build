@@ -67,7 +67,7 @@ jobs:
           CIBW_BUILD: cp3*-manylinux_x86_64
           CIBW_ENVIRONMENT: >
             FAISS_OPT_LEVELS=avx2
-            BLA_VENDOR=Intel10_64_dyn
+            BLA_VENDOR=Intel10_64_lp64
 
   build_gpu_wheels:
     name: Build GPU wheels (${{ matrix.gpu }})
