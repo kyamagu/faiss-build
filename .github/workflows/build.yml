@@ -10,6 +10,7 @@ on:
 jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
+    if: false  # Temporarily disable regular builds for debugging.
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -70,6 +71,7 @@ jobs:
 
   build_gpu_wheels:
     name: Build GPU wheels (${{ matrix.gpu }})
+    if: false  # Temporarily disable GPU builds for debugging.
     runs-on: ubuntu-24.04
     strategy:
       matrix:
