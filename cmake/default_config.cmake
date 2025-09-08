@@ -193,10 +193,14 @@ macro(configure_intel_mkl)
   # Optional MKL configuration via environment variables.
   set(MKL_INTERFACE lp64)  # faiss uses 32-bit integers for indices.
   if(DEFINED ENV{MKL_LINK})
-    set(MKL_LINK $ENV{MKL_LINK})  # Default is "dynamic".
+    set(MKL_LINK $ENV{MKL_LINK})
+  else()
+    set(MKL_LINK "static")  # Override the default "dynamic" linking.
   endif()
   if(DEFINED ENV{MKL_THREADING})
     set(MKL_THREADING $ENV{MKL_THREADING})  # Default is "intel_thread".
+  else()
+    set(MKL_THREADING "gnu_thread")  # Override the default "intel_thread".
   endif()
 
   find_package(MKL REQUIRED)
