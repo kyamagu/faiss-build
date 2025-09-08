@@ -1,4 +1,5 @@
 # Top-level default configuration for faiss-build
+include_guard()
 
 # Optimization levels; e.g., "generic,avx2"
 set(FAISS_OPT_LEVELS
@@ -179,6 +180,8 @@ macro(configure_blas_lapack)
     set(BLA_VENDOR $ENV{BLA_VENDOR})
   endif()
   if(BLA_VENDOR MATCHES "Intel*")
+    # faiss cmake is not compatible with oneAPI MKL.
+    set(FAISS_ENABLE_MKL OFF)
     if(NOT ENV{MKLROOT})
       # Fallback to oneAPI installation path.
       if(NOT EXISTS /opt/intel/oneapi/mkl/latest)
@@ -187,11 +190,14 @@ macro(configure_blas_lapack)
       set(ENV{MKLROOT} /opt/intel/oneapi/mkl/latest)
     endif()
     list(APPEND CMAKE_PREFIX_PATH "$ENV{MKLROOT}")
+    set(MKL_INTERFACE lp64)  # faiss uses 32-bit integers for indices.
     find_package(MKL REQUIRED)
 
-    # Set OpenMP variables for Intel MKL.
-    set(OpenMP_CXX_LIB_NAMES libiomp5)
-    set(OpenMP_libiomp5_LIBRARY "${MKL_ROOT}/../../compiler/latest/lib/libiomp5.so")
+    if(MKL_THREADING STREQUAL "intel_thread")
+      # Set OpenMP variables for Intel MKL.
+      set(OpenMP_CXX_LIB_NAMES libiomp5)
+      set(OpenMP_libiomp5_LIBRARY "${MKL_ROOT}/../../compiler/latest/lib/libiomp5.so")
+    endif()
   endif()
 endmacro()
 
