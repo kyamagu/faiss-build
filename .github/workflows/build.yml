@@ -10,7 +10,6 @@ on:
 jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
-    if: false  # Temporarily disable regular builds for debugging.
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -55,19 +54,8 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_mkl_wheels:
-    name: Build MKL wheels (${{ matrix.link }}, ${{ matrix.threading }})
+    name: Build MKL wheels
     runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        include:
-          - link: static
-            threading: intel_thread
-          - link: static
-            threading: gnu_thread
-          - link: dynamic
-            threading: intel_thread
-          - link: dynamic
-            threading: gnu_thread
     steps:
       - uses: actions/checkout@v5
         with:
@@ -77,14 +65,11 @@ jobs:
         env:
           CIBW_BUILD: cp3*-manylinux_x86_64
           CIBW_ENVIRONMENT: >
-            FAISS_OPT_LEVELS=avx2
             FAISS_ENABLE_MKL=ON
-            MKL_THREADING=${{ matrix.threading }}
-            MKL_LINK=${{ matrix.link }}
+            FAISS_OPT_LEVELS=avx2
 
   build_gpu_wheels:
     name: Build GPU wheels (${{ matrix.gpu }})
-    if: false  # Temporarily disable GPU builds for debugging.
     runs-on: ubuntu-24.04
     strategy:
       matrix:
