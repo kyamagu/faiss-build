@@ -3,7 +3,7 @@
 set -eux
 
 FAISS_GPU_SUPPORT=${FAISS_GPU_SUPPORT:-OFF}
-BLA_VENDOR=${BLA_VENDOR:-OpenBLAS}
+FAISS_ENABLE_MKL=${FAISS_ENABLE_MKL:-OFF}
 
 # OpenBLAS installation
 function install_openblas() {
