@@ -55,8 +55,19 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_mkl_wheels:
-    name: Build MKL wheels
+    name: Build MKL wheels (${{ matrix.link }}, ${{ matrix.threading }})
     runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        include:
+          - link: static
+            threading: intel_thread
+          - link: static
+            threading: gnu_thread
+          - link: dynamic
+            threading: intel_thread
+          - link: dynamic
+            threading: gnu_thread
     steps:
       - uses: actions/checkout@v5
         with:
@@ -67,7 +78,9 @@ jobs:
           CIBW_BUILD: cp3*-manylinux_x86_64
           CIBW_ENVIRONMENT: >
             FAISS_OPT_LEVELS=avx2
-            BLA_VENDOR=Intel10_64_lp64
+            FAISS_ENABLE_MKL=ON
+            MKL_THREADING=${{ matrix.threading }}
+            MKL_LINK=${{ matrix.link }}
 
   build_gpu_wheels:
     name: Build GPU wheels (${{ matrix.gpu }})

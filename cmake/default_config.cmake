@@ -27,6 +27,12 @@ if(NOT FAISS_OPT_LEVELS)
 endif()
 message(STATUS "Faiss optimization levels - ${FAISS_OPT_LEVELS}")
 
+# MKL support.
+option(FAISS_ENABLE_MKL "Enable MKL support." OFF)
+if(DEFINED ENV{FAISS_ENABLE_MKL})
+  set(FAISS_ENABLE_MKL $ENV{FAISS_ENABLE_MKL})
+endif()
+
 # GPU supports.
 set(FAISS_GPU_SUPPORT
     OFF
@@ -170,34 +176,38 @@ endmacro()
 macro(configure_linux_platform)
   add_compile_options(-fdata-sections -ffunction-sections)
   add_link_options(-Wl,--gc-sections -Wl,--strip-all)
-  configure_blas_lapack()
+  if(FAISS_ENABLE_MKL)
+    configure_intel_mkl()
+  endif()
 endmacro()
 
-# Helper to configure default BLAS/LAPACK setup.
-macro(configure_blas_lapack)
-  # Set Intel MKL cmake config path from MKLROOT environment variable.
-  if(DEFINED ENV{BLA_VENDOR})
-    set(BLA_VENDOR $ENV{BLA_VENDOR})
-  endif()
-  if(BLA_VENDOR MATCHES "Intel*")
-    # faiss cmake is not compatible with oneAPI MKL.
-    set(FAISS_ENABLE_MKL OFF)
-    if(NOT ENV{MKLROOT})
-      # Fallback to oneAPI installation path.
-      if(NOT EXISTS /opt/intel/oneapi/mkl/latest)
-        message(FATAL_ERROR "MKLROOT is not set and oneAPI MKL path not found.")
-      endif()
-      set(ENV{MKLROOT} /opt/intel/oneapi/mkl/latest)
-    endif()
+# Helper to configure default MKL setup.
+macro(configure_intel_mkl)
+  if(DEFINED ENV{MKLROOT})
     list(APPEND CMAKE_PREFIX_PATH "$ENV{MKLROOT}")
-    set(MKL_INTERFACE lp64)  # faiss uses 32-bit integers for indices.
-    find_package(MKL REQUIRED)
+  elseif(EXISTS /opt/intel/oneapi/mkl/latest)
+    # Assume oneAPI is installed at the default location.
+    list(APPEND CMAKE_PREFIX_PATH "/opt/intel/oneapi/mkl/latest")
+  endif()
 
-    if(MKL_THREADING STREQUAL "intel_thread")
-      # Set OpenMP variables for Intel MKL.
-      set(OpenMP_CXX_LIB_NAMES libiomp5)
-      set(OpenMP_libiomp5_LIBRARY "${MKL_ROOT}/../../compiler/latest/lib/libiomp5.so")
-    endif()
+  # Optional MKL configuration via environment variables.
+  set(MKL_INTERFACE lp64)  # faiss uses 32-bit integers for indices.
+  if(DEFINED ENV{MKL_LINK})
+    set(MKL_LINK $ENV{MKL_LINK})  # Default is "dynamic".
+  endif()
+  if(DEFINED ENV{MKL_THREADING})
+    set(MKL_THREADING $ENV{MKL_THREADING})  # Default is "intel_thread".
+  endif()
+
+  find_package(MKL REQUIRED)
+  set(FAISS_ENABLE_MKL OFF)  # faiss cmake is not compatible with oneAPI MKL.
+  set(MKL_LIBRARIES MKL::MKL)  # faiss uses MKL_LIBRARIES to set target linking.
+
+  if(MKL_THREADING STREQUAL "intel_thread")
+    # Set OpenMP variables for Intel MKL.
+    set(OpenMP_CXX_LIB_NAMES libiomp5)
+    # Only dynamic linking is supported in MKLConfig.cmake.
+    set(OpenMP_libiomp5_LIBRARY "${MKL_ROOT}/../../compiler/latest/lib/libiomp5.so")
   endif()
 endmacro()
 

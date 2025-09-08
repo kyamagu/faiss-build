@@ -139,12 +139,9 @@ EOF
 }
 
 # Main script execution
-if [ "${BLA_VENDOR}" = "OpenBLAS" ]; then
-    install_openblas
-elif [[ "${BLA_VENDOR}" == Intel* ]]; then
+if [ "${FAISS_ENABLE_MKL}" = "ON" ]; then
     install_intel_mkl
 else
-    echo "Unsupported BLA_VENDOR: ${BLA_VENDOR}. Installing 'OpenBLAS' instead."
     install_openblas
 fi
 
