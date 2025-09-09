@@ -53,6 +53,21 @@ jobs:
           name: wheel-${{ matrix.os }}
           path: ./wheelhouse/*.whl
 
+  build_mkl_wheels:
+    name: Build MKL wheels
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v3.1.4
+        env:
+          CIBW_BUILD: cp3*-manylinux_x86_64
+          CIBW_ENVIRONMENT: >
+            FAISS_ENABLE_MKL=ON
+            FAISS_OPT_LEVELS=avx2
+
   build_gpu_wheels:
     name: Build GPU wheels (${{ matrix.gpu }})
     runs-on: ubuntu-24.04

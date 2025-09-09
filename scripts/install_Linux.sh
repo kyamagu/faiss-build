@@ -3,6 +3,7 @@
 set -eux
 
 FAISS_GPU_SUPPORT=${FAISS_GPU_SUPPORT:-OFF}
+FAISS_ENABLE_MKL=${FAISS_ENABLE_MKL:-OFF}
 
 # OpenBLAS installation
 function install_openblas() {
@@ -16,6 +17,43 @@ function install_openblas() {
         yum install -y openblas-devel
     else
         echo "Unsupported package manager. Please install OpenBLAS manually."
+    fi
+}
+
+# Intel MKL installation
+function install_intel_mkl() {
+    if command -v apk &> /dev/null; then
+        echo "Intel MKL installation on Alpine is not supported yet."
+    elif command -v dnf &> /dev/null; then
+        tee /etc/yum.repos.d/oneAPI.repo << EOF
+[oneAPI]
+name=Intel® oneAPI repository
+baseurl=https://yum.repos.intel.com/oneapi
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+EOF
+        dnf install -y intel-oneapi-mkl-devel
+        tee /etc/ld.so.conf.d/oneapi.conf <<EOF
+/opt/intel/oneapi/mkl/latest/lib
+/opt/intel/oneapi/compiler/latest/lib/
+EOF
+        ldconfig
+    elif command -v apt &> /dev/null; then
+        wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+            | gpg --dearmor \
+            | tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+        echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
+            | tee /etc/apt/sources.list.d/oneAPI.list
+        apt update && apt install -y intel-oneapi-mkl-devel
+        tee /etc/ld.so.conf.d/oneapi.conf <<EOF
+/opt/intel/oneapi/mkl/latest/lib
+/opt/intel/oneapi/compiler/latest/lib/
+EOF
+        ldconfig
+    else
+        echo "Unsupported package manager. Please install Intel MKL manually."
     fi
 }
 
@@ -81,13 +119,13 @@ EOF
     elif command -v apt &> /dev/null; then
         local DISTRO=${DISTRO:-noble}
         wget https://repo.radeon.com/rocm/rocm.gpg.key -O - \
-            | gpg --dearmor | sudo tee /etc/apt/keyrings/rocm.gpg > /dev/null
+            | gpg --dearmor \
+            | tee /etc/apt/keyrings/rocm.gpg > /dev/null
         echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/${ROCM_VERSION} ${DISTRO} main" \
             | tee /etc/apt/sources.list.d/rocm.list
         echo -e 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600' \
             | tee /etc/apt/preferences.d/rocm-pin-600
-        apt update
-        apt install -y \
+        apt update && apt install -y \
             rocm-llvm \
             rocm-hip-runtime-devel \
             hipblas-devel \
@@ -100,7 +138,13 @@ EOF
     fi
 }
 
-install_openblas
+# Main script execution
+if [ "${FAISS_ENABLE_MKL}" = "ON" ]; then
+    install_intel_mkl
+else
+    install_openblas
+fi
+
 if [ "$FAISS_GPU_SUPPORT" = "CUDA" ] || [ "$FAISS_GPU_SUPPORT" = "CUVS" ]; then
     install_cuda
 elif [ "$FAISS_GPU_SUPPORT" = "ROCM" ]; then

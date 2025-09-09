@@ -1,4 +1,5 @@
 # Top-level default configuration for faiss-build
+include_guard()
 
 # Optimization levels; e.g., "generic,avx2"
 set(FAISS_OPT_LEVELS
@@ -25,6 +26,12 @@ if(NOT FAISS_OPT_LEVELS)
   message(FATAL_ERROR "FAISS_OPT_LEVELS is empty.")
 endif()
 message(STATUS "Faiss optimization levels - ${FAISS_OPT_LEVELS}")
+
+# MKL support.
+option(FAISS_ENABLE_MKL "Enable MKL support." OFF)
+if(DEFINED ENV{FAISS_ENABLE_MKL})
+  set(FAISS_ENABLE_MKL $ENV{FAISS_ENABLE_MKL})
+endif()
 
 # GPU supports.
 set(FAISS_GPU_SUPPORT
@@ -90,15 +97,9 @@ endif()
 
 # Helper to define default build options.
 macro(configure_default_options)
-  set(CMAKE_CXX_STANDARD
-      17
-     )
-  set(CMAKE_CXX_STANDARD_REQUIRED
-      ON
-     )
-  set(CMAKE_CXX_EXTENSIONS
-      OFF
-     )
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_CXX_EXTENSIONS OFF)
 
   # Set up platform-specific global flags.
   if(APPLE)
@@ -175,6 +176,43 @@ endmacro()
 macro(configure_linux_platform)
   add_compile_options(-fdata-sections -ffunction-sections)
   add_link_options(-Wl,--gc-sections -Wl,--strip-all)
+  if(FAISS_ENABLE_MKL)
+    configure_intel_mkl()
+  endif()
+endmacro()
+
+# Helper to configure default MKL setup.
+macro(configure_intel_mkl)
+  if(DEFINED ENV{MKLROOT})
+    list(APPEND CMAKE_PREFIX_PATH "$ENV{MKLROOT}")
+  elseif(EXISTS /opt/intel/oneapi/mkl/latest)
+    # Assume oneAPI is installed at the default location.
+    list(APPEND CMAKE_PREFIX_PATH "/opt/intel/oneapi/mkl/latest")
+  endif()
+
+  # Optional MKL configuration via environment variables.
+  set(MKL_INTERFACE lp64)  # faiss uses 32-bit integers for indices.
+  if(DEFINED ENV{MKL_LINK})
+    set(MKL_LINK $ENV{MKL_LINK})
+  else()
+    set(MKL_LINK "static")  # Override the default "dynamic" linking.
+  endif()
+  if(DEFINED ENV{MKL_THREADING})
+    set(MKL_THREADING $ENV{MKL_THREADING})  # Default is "intel_thread".
+  else()
+    set(MKL_THREADING "gnu_thread")  # Override the default "intel_thread".
+  endif()
+
+  find_package(MKL REQUIRED)
+  set(FAISS_ENABLE_MKL OFF)  # faiss cmake is not compatible with oneAPI MKL.
+  set(MKL_LIBRARIES MKL::MKL)  # faiss uses MKL_LIBRARIES to set target linking.
+
+  if(MKL_THREADING STREQUAL "intel_thread")
+    # Set OpenMP variables for Intel MKL.
+    set(OpenMP_CXX_LIB_NAMES libiomp5)
+    # Only dynamic linking is supported in MKLConfig.cmake.
+    set(OpenMP_libiomp5_LIBRARY "${MKL_ROOT}/../../compiler/latest/lib/libiomp5.so")
+  endif()
 endmacro()
 
 # Helper to configure default CUDA setup.
@@ -201,9 +239,12 @@ macro(configure_rocm_flags)
   if(NOT CMAKE_HIP_ARCHITECTURES)
     # Check supported GPUs at the ROCm official documentation:
     # https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/system-requirements.html
-    set(CMAKE_HIP_ARCHITECTURES gfx908;gfx90a;gfx942;gfx1030;gfx1100;gfx1101;gfx1200;gfx1201)
+    set(CMAKE_HIP_ARCHITECTURES
+        gfx908;gfx90a;gfx942;gfx1030;gfx1100;gfx1101;gfx1200;gfx1201)
   endif()
   if(NOT CMAKE_HIP_FLAGS)
-    set(CMAKE_HIP_FLAGS "-Wno-deprecated-pragma -Wno-unused-result -Wno-deprecated-declarations")
+    set(CMAKE_HIP_FLAGS
+        "-Wno-deprecated-pragma -Wno-unused-result -Wno-deprecated-declarations"
+    )
   endif()
 endmacro()
