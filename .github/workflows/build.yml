@@ -10,6 +10,7 @@ on:
 jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
+    if: false  # Temporarily disable this job
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
