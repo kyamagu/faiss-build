@@ -10,7 +10,6 @@ on:
 jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
-    if: false  # Temporarily disable this job
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -96,3 +95,7 @@ jobs:
           CIBW_ENVIRONMENT: >
             FAISS_GPU_SUPPORT=${{ matrix.gpu }}
             FAISS_OPT_LEVELS=avx2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheel-ubuntu-24.04-${{ matrix.gpu }}
+          path: ./wheelhouse/*.whl
