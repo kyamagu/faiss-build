@@ -139,14 +139,14 @@ EOF
 }
 
 # Main script execution
-if [ "${FAISS_ENABLE_MKL}" = "ON" ]; then
+if [ "${FAISS_ENABLE_MKL^^}" = "ON" ]; then
     install_intel_mkl
 else
     install_openblas
 fi
 
-if [ "$FAISS_GPU_SUPPORT" = "CUDA" ] || [ "$FAISS_GPU_SUPPORT" = "CUVS" ]; then
+if [ "${FAISS_GPU_SUPPORT^^}" = "CUDA" ] || [ "${FAISS_GPU_SUPPORT^^}" = "CUVS" ]; then
     install_cuda
-elif [ "$FAISS_GPU_SUPPORT" = "ROCM" ]; then
+elif [ "${FAISS_GPU_SUPPORT^^}" = "ROCM" ]; then
     install_rocm
 fi
